@@ -4,7 +4,7 @@ import useCompanySettings from "../../hooks/useCompanySettings";
 import { useBrand } from "../../context/BrandContext";
 import { getNavItems } from "./navConfig";
 
-export default function Sidebar() {
+export default function Sidebar({ variant = "desktop", onNavigate } = {}) {
   const { role, supportMode } = useUser();
   const { settings } = useCompanySettings();
   const { brand } = useBrand();
@@ -22,8 +22,13 @@ export default function Sidebar() {
     return location.pathname.startsWith(path);
   };
 
+  const asideClassName =
+    variant === "mobile"
+      ? "flex flex-col w-72 max-w-[85vw] h-full bg-white border-r border-slate-200"
+      : "hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 md:left-0 bg-white border-r border-slate-200";
+
   return (
-    <aside className="hidden md:flex md:flex-col md:w-64 md:fixed md:inset-y-0 md:left-0 bg-white border-r border-slate-200">
+    <aside className={asideClassName}>
       {/* Brand block */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200">
         {logoUrl && (
@@ -51,6 +56,7 @@ export default function Sidebar() {
               <li key={item.path}>
                 <Link
                   to={item.path}
+                  onClick={onNavigate}
                   className={`
                     flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
                     ${

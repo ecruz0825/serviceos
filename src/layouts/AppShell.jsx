@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Sidebar from "../components/nav/Sidebar";
 import Topbar from "../components/nav/Topbar";
 import SupportModeBanner from "../components/SupportModeBanner";
@@ -14,6 +15,17 @@ import { getDemoModeBanner } from "../lib/demo-mode";
  */
 export default function AppShell({ children, title }) {
   const demoBanner = getDemoModeBanner();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // Close mobile nav on Escape
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMobileNavOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileNavOpen]);
   
   return (
     <div className="min-h-screen bg-slate-50">
@@ -28,10 +40,31 @@ export default function AppShell({ children, title }) {
       <BillingReadOnlyBanner />
       <div className="flex">
         <Sidebar />
-        <div className="flex-1 min-w-0 md:ml-64 flex flex-col">
-          <Topbar title={title} />
-          <main className="p-6 flex-1">
-            <div className="max-w-6xl mx-auto">{children}</div>
+
+        {/* Mobile nav drawer (only on small screens) */}
+        {mobileNavOpen && (
+          <>
+            <div
+              className="fixed inset-0 bg-black/40 z-[70] md:hidden"
+              onClick={() => setMobileNavOpen(false)}
+              aria-hidden="true"
+            />
+            <div
+              className="fixed inset-y-0 left-0 z-[80] md:hidden shadow-xl"
+              role="dialog"
+              aria-modal="true"
+            >
+              <Sidebar
+                variant="mobile"
+                onNavigate={() => setMobileNavOpen(false)}
+              />
+            </div>
+          </>
+        )}
+        <div className="flex-1 min-w-0 md:ml-64 flex flex-col overflow-x-hidden">
+          <Topbar title={title} onMobileMenuClick={() => setMobileNavOpen(true)} />
+          <main className="p-4 sm:p-6 flex-1 min-w-0">
+            <div className="max-w-6xl mx-auto max-w-full min-w-0">{children}</div>
           </main>
           <footer className="border-t border-slate-200 bg-white px-6 py-3">
             <div className="max-w-6xl mx-auto">

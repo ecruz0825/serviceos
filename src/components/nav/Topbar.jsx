@@ -3,6 +3,7 @@ import { useUser } from "../../context/UserContext";
 import { supabase } from "../../supabaseClient";
 import Button from "../ui/Button";
 import toast from "react-hot-toast";
+import { Menu } from "lucide-react";
 
 // Route label mapping
 const routeLabels = {
@@ -34,7 +35,7 @@ function getRouteLabel(pathname) {
   return "Dashboard";
 }
 
-export default function Topbar({ title }) {
+export default function Topbar({ title, onMobileMenuClick }) {
   const location = useLocation();
   const { session, fullName } = useUser();
 
@@ -56,7 +57,17 @@ export default function Topbar({ title }) {
   return (
     <header className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-3">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">{displayTitle}</h1>
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={onMobileMenuClick}
+            className="md:hidden rounded-md p-2 text-slate-600 hover:bg-slate-100"
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <h1 className="text-xl font-semibold text-slate-900 truncate">{displayTitle}</h1>
+        </div>
         <div className="flex items-center gap-4">
           <div className="text-sm text-slate-600">{userDisplay}</div>
           {session && (

@@ -11,6 +11,7 @@ export default function Card({ children, clickable = false, onClick }) {
     <div
       className={`
         bg-white border border-slate-200 rounded-xl shadow-sm p-6
+        min-w-0 max-w-full
         ${clickable ? "transition hover:shadow-md cursor-pointer" : ""}
       `}
       onClick={onClick}

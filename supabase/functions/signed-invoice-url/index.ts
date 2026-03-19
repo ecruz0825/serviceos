@@ -223,25 +223,27 @@ serve(async (req) => {
       }
     } else if (userRole === "customer") {
       // Customer: allow only if job.customer_id matches caller's customer record
-      if (!user.email) {
+      const { data: customer, error: customerError } = await serviceClient
+        .from("customers")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("company_id", profile.company_id)
+        .limit(1)
+        .single();
+
+      if (customerError) {
         return new Response(
-          JSON.stringify({ error: "User email not found" }),
+          JSON.stringify({
+            error: `Customer lookup failed: ${customerError.message || "Unknown error"}`,
+          }),
           {
-            status: 403,
+            status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           }
         );
       }
 
-      const { data: customer, error: customerError } = await serviceClient
-        .from("customers")
-        .select("id")
-        .eq("email", user.email)
-        .eq("company_id", profile.company_id)
-        .limit(1)
-        .single();
-
-      if (customerError || !customer) {
+      if (!customer) {
         return new Response(
           JSON.stringify({ error: "Customer record not found" }),
           {

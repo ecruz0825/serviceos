@@ -708,9 +708,12 @@ export default function AdminDashboard() {
   const KPICard = ({ label, value, helperText, icon: Icon, iconColor = "text-green-600", onClick }) => (
     <Card clickable={!!onClick} onClick={onClick}>
       <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-slate-600 mb-1">{label}</p>
-          <p className="text-3xl font-bold mb-1" style={{ color: "var(--brand-secondary, var(--brand-primary))" }}>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-slate-600 mb-1 truncate">{label}</p>
+          <p
+            className="text-2xl sm:text-3xl font-bold mb-1 break-words"
+            style={{ color: "var(--brand-secondary, var(--brand-primary))" }}
+          >
             {loading || value === null ? "—" : value}
           </p>
           {helperText && (
@@ -871,33 +874,33 @@ export default function AdminDashboard() {
                   return (
                     <div
                       key={index}
-                      className={`py-5 px-5 flex items-center justify-between transition-all ${
+                      className={`py-5 px-5 flex flex-col sm:flex-row sm:items-center items-start justify-between gap-3 transition-all ${
                         hasCount 
                           ? `${item.bgColor} border-l-4 ${item.borderColor} hover:shadow-sm` 
                           : "hover:bg-slate-50"
                       }`}
                     >
-                      <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
                         <div className={`${item.iconColor} ${hasCount ? "opacity-100" : "opacity-60"}`}>
                           <Icon className={`${hasCount ? "w-6 h-6" : "w-5 h-5"}`} />
                         </div>
-                        <div className="flex-1">
-                          <p className={`${hasCount ? "text-base font-semibold text-slate-900" : "text-sm font-medium text-slate-700"}`}>
+                        <div className="flex-1 min-w-0">
+                          <p className={`${hasCount ? "text-base font-semibold text-slate-900" : "text-sm font-medium text-slate-700"} break-words`}>
                             {item.label}
                           </p>
-                          <p className="text-xs text-slate-500 mt-0.5">
+                          <p className="text-xs text-slate-500 mt-0.5 break-words">
                             {item.helper}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3 flex-wrap justify-end w-full sm:w-auto">
                         <span className={`${hasCount ? "text-2xl font-bold" : "text-lg font-semibold"} text-slate-900 min-w-[3rem] text-right`}>
                           {item.count}
                         </span>
                         {hasCount && (
                           <button
                             onClick={item.onClick}
-                            className="btn-accent px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            className="btn-accent px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 w-full sm:w-auto"
                           >
                             {item.action}
                           </button>
