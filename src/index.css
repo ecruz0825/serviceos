@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Brand theming === */
+:root {
+  /* Default brand colors – will be overridden at runtime by BrandContext */
+  --brand-primary: #22c55e;
+  --brand-primary-hover: #15803d;
+  --brand-on-primary: #ffffff;
+  --brand-name: "Company";
+  --brand-logo-url: none;
+}
+
+/* Generic brand button */
+.btn-brand {
+  background-color: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+
+.btn-brand:hover {
+  background-color: var(--brand-primary-hover);
+}
+
+/* Navbar links that use the brand color */
+.nav-link {
+  @apply px-3 py-2 rounded-md text-sm font-medium;
+  color: var(--brand-primary);
+}
+
+.nav-link-active {
+  background-color: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+
+/* Links and active states use brand color */
+a[class*="text-blue"] {
+  color: var(--brand-primary) !important;
+}
+
+/* Badges and highlights */
+.badge-brand {
+  background-color: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+
+.badge-secondary {
+  background-color: var(--brand-secondary);
+  color: var(--brand-on-primary);
+}
+
+.badge-accent {
+  background-color: var(--brand-accent);
+  color: var(--brand-on-primary);
+}
+
+/* Secondary and accent brand buttons */
+.btn-secondary {
+  background-color: var(--brand-secondary);
+  color: var(--brand-on-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--brand-secondary-hover);
+}
+
+.btn-accent {
+  background-color: var(--brand-accent);
+  color: var(--brand-on-primary);
+}
+
+.btn-accent:hover {
+  background-color: var(--brand-accent-hover);
+}

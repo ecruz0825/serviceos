@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PWA Icon Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    canvas { border: 1px solid #ccc; margin: 10px 0; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    .instructions { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <h1>PWA Icon Generator</h1>
+  <div class="instructions">
+    <p>This tool generates placeholder PWA icons. Open this file in a browser and click the buttons to download icons.</p>
+  </div>
+
+  <div>
+    <h2>192x192 Icon</h2>
+    <canvas id="canvas192" width="192" height="192"></canvas>
+    <br>
+    <button onclick="downloadIcon(192)">Download pwa-192x192.png</button>
+  </div>
+
+  <div>
+    <h2>512x512 Icon</h2>
+    <canvas id="canvas512" width="512" height="512"></canvas>
+    <br>
+    <button onclick="downloadIcon(512)">Download pwa-512x512.png</button>
+  </div>
+
+  <div>
+    <h2>180x180 Icon (Apple Touch)</h2>
+    <canvas id="canvas180" width="180" height="180"></canvas>
+    <br>
+    <button onclick="downloadIcon(180)">Download apple-touch-icon.png</button>
+  </div>
+
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      
+      // Background: Blue (#2563eb)
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(0, 0, size, size);
+      
+      // White text "CP" (Crew Portal)
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${size * 0.4}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('CP', size / 2, size / 2);
+    }
+
+    function downloadIcon(size) {
+      const canvas = document.getElementById(`canvas${size}`);
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = size === 180 ? 'apple-touch-icon.png' : `pwa-${size}x${size}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }
+
+    // Draw icons on load
+    window.onload = () => {
+      drawIcon(document.getElementById('canvas192'), 192);
+      drawIcon(document.getElementById('canvas512'), 512);
+      drawIcon(document.getElementById('canvas180'), 180);
+    };
+  </script>
+</body>
+</html>

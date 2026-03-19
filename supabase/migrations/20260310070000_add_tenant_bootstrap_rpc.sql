@@ -1,0 +1,151 @@
+-- =============================================================================
+-- Tenant Bootstrap RPC (Phase 6)
+-- =============================================================================
+-- Allows an authenticated, unlinked user to:
+-- 1) Create a company
+-- 2) Link their existing profile to that company
+-- 3) Become the first admin for that tenant
+--
+-- Safety properties:
+-- - Requires auth.uid()
+-- - Locks caller profile row (FOR UPDATE)
+-- - Idempotent: returns already_linked when profile.company_id is set
+-- - Never trusts caller-supplied user_id/company_id
+-- =============================================================================
+
+BEGIN;
+
+CREATE OR REPLACE FUNCTION public.bootstrap_tenant_for_current_user(
+  p_company_name text,
+  p_display_name text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO public
+AS $$
+DECLARE
+  v_user_id uuid;
+  v_profile_id uuid;
+  v_existing_company_id uuid;
+  v_existing_role text;
+  v_existing_full_name text;
+  v_company_id uuid;
+  v_company_name text;
+  v_display_name text;
+BEGIN
+  -- 1) Require authentication
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'AUTH_REQUIRED';
+  END IF;
+
+  -- 2) Validate company name
+  v_company_name := NULLIF(btrim(COALESCE(p_company_name, '')), '');
+  IF v_company_name IS NULL THEN
+    RAISE EXCEPTION 'COMPANY_NAME_REQUIRED';
+  END IF;
+
+  v_display_name := NULLIF(btrim(COALESCE(p_display_name, '')), '');
+  IF v_display_name IS NULL THEN
+    v_display_name := v_company_name;
+  END IF;
+
+  -- 3) Load + lock caller profile row
+  SELECT
+    p.id,
+    p.company_id,
+    p.role,
+    p.full_name
+  INTO
+    v_profile_id,
+    v_existing_company_id,
+    v_existing_role,
+    v_existing_full_name
+  FROM public.profiles p
+  WHERE p.id = v_user_id
+  FOR UPDATE;
+
+  IF v_profile_id IS NULL THEN
+    RAISE EXCEPTION 'PROFILE_NOT_FOUND';
+  END IF;
+
+  -- 4) Idempotency: if already linked, return existing company id
+  IF v_existing_company_id IS NOT NULL THEN
+    RETURN jsonb_build_object(
+      'ok', true,
+      'status', 'already_linked',
+      'company_id', v_existing_company_id
+    );
+  END IF;
+
+  -- 5) Create company with required base field
+  INSERT INTO public.companies (
+    name
+  ) VALUES (
+    v_company_name
+  )
+  RETURNING id INTO v_company_id;
+
+  -- 6) Set optional company fields only when those columns exist
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'companies'
+      AND column_name = 'display_name'
+  ) THEN
+    UPDATE public.companies
+    SET display_name = v_display_name
+    WHERE id = v_company_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'companies'
+      AND column_name = 'onboarding_step'
+  ) THEN
+    UPDATE public.companies
+    SET onboarding_step = 'company'
+    WHERE id = v_company_id;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'companies'
+      AND column_name = 'setup_completed_at'
+  ) THEN
+    UPDATE public.companies
+    SET setup_completed_at = NULL
+    WHERE id = v_company_id;
+  END IF;
+
+  -- 7) Link caller profile to company and promote to admin
+  UPDATE public.profiles
+  SET
+    company_id = v_company_id,
+    role = 'admin',
+    full_name = CASE
+      WHEN NULLIF(btrim(COALESCE(full_name, '')), '') IS NULL
+           AND NULLIF(btrim(COALESCE(p_display_name, '')), '') IS NOT NULL
+      THEN btrim(p_display_name)
+      ELSE full_name
+    END
+  WHERE id = v_profile_id;
+
+  -- 8) Created response
+  RETURN jsonb_build_object(
+    'ok', true,
+    'status', 'created',
+    'company_id', v_company_id
+  );
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.bootstrap_tenant_for_current_user(text, text) TO authenticated;
+
+COMMIT;

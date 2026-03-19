@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "start": "deno run --allow-env --allow-net index.ts"
+  },
+  "imports": {}
+}

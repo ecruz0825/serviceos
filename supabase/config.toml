@@ -1,0 +1,33 @@
+
+[functions.create-stripe-account-link]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-stripe-account-link/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/create-stripe-account-link/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/create-stripe-account-link/*.html" ]
+
+[functions.invite-user]
+enabled = true
+verify_jwt = true
+import_map = "./functions/invite-user/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/invite-user/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/invite-user/*.html" ]
+
+[functions.auto-generate-recurring-jobs]
+enabled = true
+verify_jwt = true
+import_map = "./functions/auto-generate-recurring-jobs/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/auto-generate-recurring-jobs/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/auto-generate-recurring-jobs/*.html" ]
