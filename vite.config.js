@@ -41,6 +41,8 @@ export default defineConfig({
       workbox: {
         // Only cache app shell assets (JS, CSS, HTML, icons)
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Increase max file size for precaching (default is 2 MiB, bundle is ~2.26 MB)
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4 MiB
         // Explicitly exclude Supabase API endpoints from navigation fallback
         navigateFallbackDenylist: [
           /^https:\/\/.*\.supabase\.co\/.*/i,
