@@ -590,13 +590,15 @@ export default function SchedulingCenterAdmin() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <PageHeader
-          title="Scheduling Center"
-          subtitle="Operational view of recurring schedules and upcoming service generation."
-        />
-        <Button
+    <div className="space-y-8">
+      {/* Focal: key actions + metrics */}
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/40 p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <PageHeader
+            title="Scheduling Center"
+            subtitle="Operational view of recurring schedules and upcoming service generation."
+          />
+          <Button
           onClick={handleGenerateJobs}
           disabled={generating || loading || supportMode || billingDisabled}
           className="flex items-center gap-2"
@@ -605,10 +607,10 @@ export default function SchedulingCenterAdmin() {
           <Play className="h-4 w-4" />
           {generating ? "Generating..." : "Generate Scheduled Jobs"}
         </Button>
-      </div>
+        </div>
 
-      {/* Plan Usage */}
-      <LimitCard
+        {/* Plan Usage */}
+        <LimitCard
         label="Jobs This Month"
         current={usage.current_jobs_this_month}
         limit={limits.max_jobs_per_month}
@@ -616,29 +618,24 @@ export default function SchedulingCenterAdmin() {
       />
 
       {/* Approaching Limit Warning */}
-      <LimitWarningBanner
-        label="Jobs This Month"
-        current={usage.current_jobs_this_month}
-        limit={limits.max_jobs_per_month}
-        isLoading={limitsLoading}
-      />
+        <LimitWarningBanner
+          label="Jobs This Month"
+          current={usage.current_jobs_this_month}
+          limit={limits.max_jobs_per_month}
+          isLoading={limitsLoading}
+        />
 
-      {/* Generation Path Guidance */}
-      <Card>
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="rounded-xl border border-slate-100 bg-white/80 p-4 mt-4">
           <div className="flex items-start gap-2">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-blue-900">
-              <p className="font-medium mb-1">Bulk Route Generation</p>
-              <p className="text-blue-700">
-                Use "Generate Today's Draft Routes" to bulk-generate routes for all teams with assigned jobs today. Ideal for daily operational preparation.
-              </p>
-            </div>
+            <Info className="h-4 w-4 text-slate-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-slate-600">
+              Use "Generate Today's Draft Routes" below to bulk-generate routes for all teams with assigned jobs today.
+            </p>
           </div>
         </div>
-      </Card>
+      </div>
 
-      {/* Schedule Health Summary */}
+      {/* Schedule Health Summary — grouped */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <div className="p-6">
@@ -669,10 +666,10 @@ export default function SchedulingCenterAdmin() {
         </Card>
       </div>
 
-      {/* Upcoming Recurring Work */}
+      {/* Upcoming Recurring Work — secondary */}
       <Card>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <div className="p-5">
+          <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <Clock className="h-5 w-5" />
             Upcoming Recurring Work
           </h2>
@@ -707,10 +704,10 @@ export default function SchedulingCenterAdmin() {
         </div>
       </Card>
 
-      {/* Next 7 Days Scheduled Jobs */}
+      {/* Next 7 Days Scheduled Jobs — secondary */}
       <Card>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <div className="p-5">
+          <h2 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <Calendar className="h-5 w-5" />
             Next 7 Days Scheduled Jobs
           </h2>
@@ -769,11 +766,11 @@ export default function SchedulingCenterAdmin() {
         </Card>
       )}
 
-      {/* Today's Teams Requiring Routes */}
+      {/* Today's Teams Requiring Routes — secondary */}
       <Card>
-        <div className="p-6">
+        <div className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+            <h2 className="text-base font-semibold text-slate-800 flex items-center gap-2">
               <Route className="h-5 w-5" />
               Today's Teams Requiring Routes
             </h2>

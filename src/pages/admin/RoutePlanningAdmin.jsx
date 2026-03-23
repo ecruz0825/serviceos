@@ -375,68 +375,51 @@ export default function RoutePlanningAdmin() {
   const isLoading = generatingRoute || refreshingRoute;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="Route Viewer"
         subtitle="View and generate individual team routes for specific service dates. Use Schedule for route planning and optimization."
       />
 
-      {/* Purpose Guidance */}
-      <Card>
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start gap-2">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-blue-900">
-              <p className="font-medium mb-1">Route Viewer & Generator</p>
-              <p className="text-blue-700">
-                View or generate a route for a specific team and date. For route planning and optimization, use the Schedule tab.
-              </p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Validation Summary */}
-      {showValidation && validationSummary && (
+      {/* Focal: Generate Route — primary action zone */}
+      <div className="rounded-2xl border-2 border-slate-200 bg-slate-50/50 p-1 shadow-sm">
         <Card>
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-            <div className="flex items-start justify-between mb-2">
-              <h3 className="text-sm font-semibold text-slate-900">Pre-Generation Validation</h3>
-              <button
-                onClick={() => setShowValidation(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                ×
-              </button>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="text-slate-700">
-                <span className="font-medium">{validationSummary.totalJobs}</span> job{validationSummary.totalJobs !== 1 ? 's' : ''} assigned to this team for {formatDateOnly(serviceDate)}
+          <div className="space-y-5">
+            {showValidation && validationSummary && (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-slate-900">Pre-Generation Validation</h3>
+                  <button
+                    onClick={() => setShowValidation(false)}
+                    className="text-slate-400 hover:text-slate-600"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="text-slate-700">
+                    <span className="font-medium">{validationSummary.totalJobs}</span> job{validationSummary.totalJobs !== 1 ? 's' : ''} assigned to this team for {formatDateOnly(serviceDate)}
+                  </div>
+                  {validationSummary.missingAddress > 0 && (
+                    <div className="text-amber-700">
+                      <span className="font-medium">{validationSummary.missingAddress}</span> job{validationSummary.missingAddress !== 1 ? 's' : ''} missing address{validationSummary.missingAddress !== 1 ? 'es' : ''}
+                    </div>
+                  )}
+                  {validationSummary.missingCoords > 0 && (
+                    <div className="text-amber-700">
+                      <span className="font-medium">{validationSummary.missingCoords}</span> job{validationSummary.missingCoords !== 1 ? 's' : ''} missing coordinates (route will use fallback ordering)
+                    </div>
+                  )}
+                  {validationSummary.totalJobs === 0 && (
+                    <div className="text-red-700 font-medium">
+                      No jobs assigned to this team for the selected date.
+                    </div>
+                  )}
+                </div>
               </div>
-              {validationSummary.missingAddress > 0 && (
-                <div className="text-amber-700">
-                  <span className="font-medium">{validationSummary.missingAddress}</span> job{validationSummary.missingAddress !== 1 ? 's' : ''} missing address{validationSummary.missingAddress !== 1 ? 'es' : ''}
-                </div>
-              )}
-              {validationSummary.missingCoords > 0 && (
-                <div className="text-amber-700">
-                  <span className="font-medium">{validationSummary.missingCoords}</span> job{validationSummary.missingCoords !== 1 ? 's' : ''} missing coordinates (route will use fallback ordering)
-                </div>
-              )}
-              {validationSummary.totalJobs === 0 && (
-                <div className="text-red-700 font-medium">
-                  No jobs assigned to this team for the selected date.
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
-      )}
+            )}
 
-      {/* Controls Section */}
-      <Card>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Service Date Input */}
             <div>
               <label htmlFor="service-date" className="block text-sm font-medium text-slate-700 mb-1">
@@ -516,33 +499,42 @@ export default function RoutePlanningAdmin() {
               </Button>
             </div>
           </div>
-        </div>
-      </Card>
-
-      {/* Route Display */}
-      {isLoading && !routeData && (
-        <Card>
-          <LoadingSpinner text={generatingRoute ? "Generating route..." : "Loading route..."} />
+          </div>
         </Card>
+      </div>
+
+      {/* Purpose guidance — subtle */}
+      <div className="rounded-xl border border-slate-100 bg-slate-50/30 px-4 py-3">
+        <div className="flex items-start gap-2">
+          <Info className="h-4 w-4 text-slate-500 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-slate-600">
+            View or generate a route for a specific team and date. For route planning and optimization, use the Schedule tab.
+          </p>
+        </div>
+      </div>
+
+      {/* Validation Summary */}
+      {isLoading && !routeData && (
+        <div className="rounded-xl border border-slate-200 bg-white py-12">
+          <LoadingSpinner text={generatingRoute ? "Generating route..." : "Loading route..."} />
+        </div>
       )}
 
       {routeError && !isLoading && (
-        <Card>
-          <div className="text-center py-8">
-            <p className="text-red-600 font-medium">Error loading route</p>
-            <p className="text-sm text-slate-600 mt-2">{routeError}</p>
-          </div>
-        </Card>
+        <div className="rounded-xl border border-slate-200 bg-white py-10 px-6 text-center">
+          <p className="text-red-600 font-medium">Error loading route</p>
+          <p className="text-sm text-slate-600 mt-2">{routeError}</p>
+        </div>
       )}
 
       {!isLoading && !routeError && !routeData && (
-        <Card>
+        <div className="rounded-xl border border-slate-200 bg-slate-50/30 py-12 px-6 text-center">
           <EmptyState
             icon={Route}
-            title="No saved route found"
-            description="No saved route found for this team and date. Click 'Generate Route' to create one."
+            title="No route for this team and date"
+            description="Select a date and team above, then click Generate Route to build the run. Jobs must be assigned and have addresses."
           />
-        </Card>
+        </div>
       )}
 
       {!isLoading && routeData && (

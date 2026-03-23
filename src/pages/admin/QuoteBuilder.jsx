@@ -633,78 +633,67 @@ export default function QuoteBuilder() {
 
       {/* Status Display (View Mode Only) */}
       {isReadOnly && quoteStatus && (
-        <Card className="mb-6">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-700">Status:</span>
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(quoteStatus)}`}>
-                  {quoteStatus.charAt(0).toUpperCase() + quoteStatus.slice(1)}
-                </span>
-              </div>
-              <span className="text-xs text-slate-500 ml-0">
-                {getQuoteNextStep(quoteMetadata)}
-              </span>
-            </div>
-            {quoteMetadata.created_at && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-700">Created:</span>
-                <span className="text-sm text-slate-600">{formatDate(quoteMetadata.created_at)}</span>
-              </div>
-            )}
-            {quoteMetadata.sent_at && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-700">Sent:</span>
-                <span className="text-sm text-slate-600">{formatDate(quoteMetadata.sent_at)}</span>
-              </div>
-            )}
-            {quoteStatus === 'accepted' && quoteMetadata.accepted_at && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-700">Accepted:</span>
-                <span className="text-sm text-slate-600">{formatDate(quoteMetadata.accepted_at)}</span>
-              </div>
-            )}
-            {quoteStatus === 'rejected' && quoteMetadata.rejected_at && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-700">Rejected:</span>
-                <span className="text-sm text-slate-600">{formatDate(quoteMetadata.rejected_at)}</span>
-              </div>
-            )}
-          </div>
-          {/* Accept/Reject Details */}
-          {quoteStatus === 'accepted' && quoteMetadata.accepted_by_name && (
-            <div className="mt-4 pt-4 border-t border-slate-200">
-              <div className="text-sm">
-                <span className="font-medium text-slate-700">Accepted by: </span>
-                <span className="text-slate-600">{quoteMetadata.accepted_by_name}</span>
-              </div>
-              {quoteMetadata.customer_comment && (
-                <div className="mt-2 text-sm">
-                  <span className="font-medium text-slate-700">Comment: </span>
-                  <span className="text-slate-600">{quoteMetadata.customer_comment}</span>
+        <div className="mb-6">
+          <Card>
+            <div className="space-y-4">
+              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div className="space-y-1">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Quote Summary</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getStatusBadgeClass(quoteStatus)}`}>
+                      {quoteStatus.charAt(0).toUpperCase() + quoteStatus.slice(1)}
+                    </span>
+                    <span className="text-xs text-slate-500">{getQuoteNextStep(quoteMetadata)}</span>
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
-          {quoteStatus === 'rejected' && quoteMetadata.rejected_by_name && (
-            <div className="mt-4 pt-4 border-t border-slate-200">
-              <div className="text-sm">
-                <span className="font-medium text-slate-700">Rejected by: </span>
-                <span className="text-slate-600">{quoteMetadata.rejected_by_name}</span>
-              </div>
-              {quoteMetadata.customer_comment && (
-                <div className="mt-2 text-sm">
-                  <span className="font-medium text-slate-700">Comment: </span>
-                  <span className="text-slate-600">{quoteMetadata.customer_comment}</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-sm">
+                  {quoteMetadata.created_at && (
+                    <div>
+                      <span className="block text-xs font-medium text-slate-500 uppercase tracking-wide">Created</span>
+                      <span className="text-slate-700">{formatDate(quoteMetadata.created_at)}</span>
+                    </div>
+                  )}
+                  {quoteMetadata.sent_at && (
+                    <div>
+                      <span className="block text-xs font-medium text-slate-500 uppercase tracking-wide">Sent</span>
+                      <span className="text-slate-700">{formatDate(quoteMetadata.sent_at)}</span>
+                    </div>
+                  )}
+                  {quoteStatus === 'accepted' && quoteMetadata.accepted_at && (
+                    <div>
+                      <span className="block text-xs font-medium text-slate-500 uppercase tracking-wide">Accepted</span>
+                      <span className="text-slate-700">{formatDate(quoteMetadata.accepted_at)}</span>
+                    </div>
+                  )}
+                  {quoteStatus === 'rejected' && quoteMetadata.rejected_at && (
+                    <div>
+                      <span className="block text-xs font-medium text-slate-500 uppercase tracking-wide">Rejected</span>
+                      <span className="text-slate-700">{formatDate(quoteMetadata.rejected_at)}</span>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+              {(quoteStatus === 'accepted' && quoteMetadata.accepted_by_name) || (quoteStatus === 'rejected' && quoteMetadata.rejected_by_name) ? (
+                <div className="pt-3 border-t border-slate-100 text-sm space-y-1">
+                  {quoteStatus === 'accepted' && quoteMetadata.accepted_by_name && (
+                    <div><span className="font-medium text-slate-700">Accepted by:</span> <span className="text-slate-600">{quoteMetadata.accepted_by_name}</span></div>
+                  )}
+                  {quoteStatus === 'rejected' && quoteMetadata.rejected_by_name && (
+                    <div><span className="font-medium text-slate-700">Rejected by:</span> <span className="text-slate-600">{quoteMetadata.rejected_by_name}</span></div>
+                  )}
+                  {quoteMetadata.customer_comment && (
+                    <div><span className="font-medium text-slate-700">Comment:</span> <span className="text-slate-600">{quoteMetadata.customer_comment}</span></div>
+                  )}
+                </div>
+              ) : null}
             </div>
-          )}
-        </Card>
+          </Card>
+        </div>
       )}
 
       {/* Customer Selector */}
-      <Card className="mb-6">
+      <div className="mb-6">
+      <Card>
         <label className="block text-sm font-medium text-slate-700 mb-2">
           Customer <span className="text-red-500">*</span>
         </label>
@@ -727,9 +716,11 @@ export default function QuoteBuilder() {
           </select>
         )}
       </Card>
+      </div>
 
       {/* Quote Items Table */}
-      <Card className="mb-6">
+      <div className="mb-6">
+      <Card>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-slate-800">Services</h3>
           {!isReadOnly && (
@@ -822,17 +813,20 @@ export default function QuoteBuilder() {
           </table>
         </div>
       </Card>
+      </div>
 
       {/* Totals Card */}
-      <Card className="mb-6">
-        <div className="space-y-2">
+      <div className="mb-6">
+      <Card>
+        <div className="space-y-3">
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Quote Totals</div>
           <div className="flex justify-between items-center">
-            <span className="text-slate-700 font-medium">Subtotal:</span>
+            <span className="text-slate-600">Subtotal</span>
             <span className="text-slate-800 font-semibold">{formatMoney(subtotal)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <label className="text-slate-700 font-medium">
-              Tax:
+            <label className="text-slate-600">
+              Tax
               {!isReadOnly && (
                 <input
                   type="number"
@@ -843,24 +837,26 @@ export default function QuoteBuilder() {
                   className="ml-2 w-24 border border-slate-300 rounded px-2 py-1 text-sm"
                 />
               )}
-              {isReadOnly && <span className="ml-2">{formatMoney(formData.tax || 0)}</span>}
+              {isReadOnly && <span className="ml-2 font-medium text-slate-800">{formatMoney(formData.tax || 0)}</span>}
             </label>
           </div>
-          <div className="border-t border-slate-200 pt-2 flex justify-between items-center">
-            <span className="text-slate-800 font-semibold text-lg">Total:</span>
-            <span className="text-slate-800 font-bold text-lg">{formatMoney(total)}</span>
+          <div className="border-t border-slate-100 pt-3 flex justify-between items-center">
+            <span className="text-slate-900 font-semibold text-base">Total</span>
+            <span className="text-slate-900 font-bold text-xl tracking-tight">{formatMoney(total)}</span>
           </div>
         </div>
       </Card>
+      </div>
 
       {/* Valid Until & Notes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="h-full">
         <Card>
           <label className="block text-sm font-medium text-slate-700 mb-2">
             Valid Until
           </label>
           {isReadOnly ? (
-            <div className="text-slate-700">
+            <div className="text-slate-700 min-h-[64px] flex items-center">
               {formData.valid_until ? new Date(formData.valid_until).toLocaleDateString() : '—'}
             </div>
           ) : (
@@ -872,13 +868,15 @@ export default function QuoteBuilder() {
             />
           )}
         </Card>
+        </div>
 
+        <div className="h-full">
         <Card>
           <label className="block text-sm font-medium text-slate-700 mb-2">
             Notes
           </label>
           {isReadOnly ? (
-            <div className="text-slate-700 whitespace-pre-wrap min-h-[60px]">
+            <div className="text-slate-700 whitespace-pre-wrap min-h-[64px] leading-relaxed">
               {formData.notes || '—'}
             </div>
           ) : (
@@ -891,12 +889,14 @@ export default function QuoteBuilder() {
             />
           )}
         </Card>
+        </div>
       </div>
 
       {/* Action Buttons */}
       {!isReadOnly && (
+        <div className="mb-6">
         <Card>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               onClick={handleSaveDraft}
               variant="secondary"
@@ -919,12 +919,14 @@ export default function QuoteBuilder() {
             </Button>
           </div>
         </Card>
+        </div>
       )}
 
       {/* Convert to Job & Download PDF Buttons (View Mode Only) */}
       {isReadOnly && id && (
+        <div className="mb-6">
         <Card>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3">
             {quoteMetadata.converted_job_id ? (
               <Button
                 onClick={handleConvertToJob}
@@ -1137,6 +1139,7 @@ export default function QuoteBuilder() {
             )}
           </div>
         </Card>
+        </div>
       )}
 
       {/* Compose Email Modal */}

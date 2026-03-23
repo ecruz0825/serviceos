@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 import toast from 'react-hot-toast'
 import PageHeader from '../../components/ui/PageHeader'
-import Card from '../../components/ui/Card'
 import Button from '../../components/ui/Button'
 import { generateQuotePDF } from '../../utils/quotePdf'
 import ComposeEmailModal from '../../components/ui/ComposeEmailModal'
@@ -587,35 +586,38 @@ export default function QuotesAdmin() {
 
   return (
     <div>
-      <PageHeader
-        title="Quotes"
-        subtitle="Create and manage customer quotes"
-        actions={
-          <div className="flex gap-2">
-            <Button
-              onClick={handleProcessEmailQueue}
-              className="btn-secondary"
-              disabled={processingQueue}
-            >
-              {processingQueue ? 'Processing...' : 'Process Email Queue'}
-            </Button>
-            <Button
-              onClick={() => navigate('/admin/quotes/new')}
-              className="btn-accent"
-            >
-              New Quote
-            </Button>
-          </div>
-        }
-      />
+      <div className="mb-8">
+        <PageHeader
+          title="Quotes"
+          subtitle="Create and manage customer quotes"
+          actions={
+            <div className="flex gap-2">
+              <Button
+                onClick={handleProcessEmailQueue}
+                variant="secondary"
+                disabled={processingQueue}
+              >
+                {processingQueue ? 'Processing...' : 'Process Email Queue'}
+              </Button>
+              <Button
+                onClick={() => navigate('/admin/quotes/new')}
+                className="btn-accent"
+              >
+                New Quote
+              </Button>
+            </div>
+          }
+        />
+      </div>
 
-      {/* Inbox Tabs */}
-      <Card className="mb-6">
-        <div className="mb-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium text-slate-700">Inbox:</span>
-              <div className="flex flex-wrap gap-2">
+      {/* Command area — inbox, filters, search, reminder */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4 mb-6">
+        <div className="flex flex-col gap-4">
+          {/* Row 1: Inbox view + Reminder */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">View</span>
+              <div className="flex flex-wrap gap-1.5">
                 {[
                   { key: 'all', label: 'All' },
                   { key: 'expiring_soon', label: 'Expiring Soon' },
@@ -628,10 +630,10 @@ export default function QuotesAdmin() {
                   <button
                     key={tab.key}
                     onClick={() => setInboxTab(tab.key)}
-                    className={`px-3 py-1 rounded-full text-sm border transition ${
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       inboxTab === tab.key
-                        ? 'bg-blue-100 text-blue-700 font-medium border-blue-400'
-                        : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-700'
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
                     }`}
                   >
                     {tab.label}
@@ -641,98 +643,79 @@ export default function QuotesAdmin() {
             </div>
             <Button
               onClick={handleRunReminderSweep}
-              className="btn-secondary text-sm"
+              variant="tertiary"
+              size="sm"
               disabled={runningReminderSweep}
+              className="text-slate-600 whitespace-nowrap"
             >
               {runningReminderSweep ? 'Running...' : 'Run Reminder Sweep'}
             </Button>
           </div>
-        </div>
 
-        {/* Quick Filter Chips (Legacy Status Filter) */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-slate-700">Status Filter:</span>
-            <div className="flex flex-wrap gap-2">
-              {['all', 'draft', 'sent', 'accepted', 'rejected', 'expired'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setStatusFilter(filter)}
-                  className={`px-3 py-1 rounded-full text-sm border transition ${
-                    statusFilter === filter
-                      ? 'bg-slate-200 font-medium border-slate-400'
-                      : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                </button>
-              ))}
+          {/* Row 2: Status chips + Filters + Search */}
+          <div className="flex flex-col lg:flex-row lg:items-end gap-4 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</span>
+              <div className="flex flex-wrap gap-1.5">
+                {['all', 'draft', 'sent', 'accepted', 'rejected', 'expired'].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setStatusFilter(filter)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      statusFilter === filter
+                        ? 'bg-slate-800 text-white'
+                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 flex-1 lg:justify-end lg:max-w-xl">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300"
+              >
+                <option value="all">All Statuses</option>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+                <option value="expired">Expired</option>
+              </select>
+              <select
+                value={customerFilter}
+                onChange={(e) => setCustomerFilter(e.target.value)}
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300"
+              >
+                <option value="all">All Customers</option>
+                {customers.map(customer => (
+                  <option key={customer.id} value={customer.id}>
+                    {getCustomerName(customer)}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Quote #"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300 min-w-[8rem]"
+              />
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Status Filter */}
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Status
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
-            >
-              <option value="all">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="accepted">Accepted</option>
-              <option value="rejected">Rejected</option>
-              <option value="expired">Expired</option>
-            </select>
-          </div>
-
-          {/* Customer Filter */}
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Customer
-            </label>
-            <select
-              value={customerFilter}
-              onChange={(e) => setCustomerFilter(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
-            >
-              <option value="all">All Customers</option>
-              {customers.map(customer => (
-                <option key={customer.id} value={customer.id}>
-                  {getCustomerName(customer)}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Search */}
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Search Quote #
-            </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Q-0001"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-      </Card>
-
-      {/* Quotes Table */}
+      {/* Quotes results */}
       {loading ? (
-        <Card>
-          <div className="text-center py-8 text-slate-500">Loading quotes...</div>
-        </Card>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-8">
+          <div className="text-center py-8 text-slate-500 text-sm">Loading quotes...</div>
+        </div>
       ) : filteredQuotes.length === 0 ? (
-        <Card>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-8">
           {quotes.length === 0 ? (
             <EmptyState
               icon={FileText}
@@ -742,36 +725,36 @@ export default function QuotesAdmin() {
               onAction={() => navigate('/admin/quotes/new')}
             />
           ) : (
-            <div className="text-center py-8 text-slate-500">
-              <p>No quotes match these filters.</p>
+            <div className="text-center py-10 text-slate-500">
+              <p className="text-sm">No quotes match these filters.</p>
             </div>
           )}
-        </Card>
+        </div>
       ) : (
-        <Card>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Quote #</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Customer</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Total</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Status</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Expires</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Created</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Next Action</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Actions</th>
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50/80">
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Quote #</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Expires</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Created</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Next Action</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-100">
                 {filteredQuotes.map(quote => {
                   const customer = customersById[quote.customer_id]
                   const { isExpired, isExpiringSoon, daysUntilExpiry } = getQuoteExpirationInfo(quote)
                   const expiresAt = quote.expires_at || quote.valid_until
                   
                   return (
-                    <tr key={quote.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3">
+                    <tr key={quote.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2 flex-wrap">
                           <button
                             onClick={() => navigate(`/admin/quotes/${quote.id}`)}
@@ -796,13 +779,13 @@ export default function QuotesAdmin() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-700">
+                      <td className="px-5 py-3.5 text-slate-700">
                         {getCustomerName(customer)}
                       </td>
-                      <td className="px-4 py-3 text-slate-700 font-medium">
+                      <td className="px-5 py-3.5 text-slate-700 font-medium">
                         {formatMoney(quote.total)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3.5">
                         <div className="flex flex-col gap-1">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(quote.status)}`}>
                             {quote.status.charAt(0).toUpperCase() + quote.status.slice(1)}
@@ -812,16 +795,16 @@ export default function QuotesAdmin() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
+                      <td className="px-5 py-3.5 text-slate-600">
                         {expiresAt ? formatDate(expiresAt) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
+                      <td className="px-5 py-3.5 text-slate-600">
                         {formatDate(quote.created_at)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3.5">
                         {(() => {
                           const nextAction = getQuoteNextAction(quote)
-                          if (!nextAction) return null
+                          if (!nextAction) return <span className="text-xs text-slate-400">—</span>
                           return (
                             <Button
                               variant={nextAction.kind === 'primary' ? 'primary' : 'secondary'}
@@ -837,33 +820,33 @@ export default function QuotesAdmin() {
                                   navigate(`/admin/quotes/${quote.id}`)
                                 }
                               }}
-                              className="text-xs"
+                              className="text-xs font-medium"
                             >
                               {nextAction.label}
                             </Button>
                           )
                         })()}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2 flex-wrap">
+                      <td className="px-5 py-3.5">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                           <button
                             onClick={() => navigate(`/admin/quotes/${quote.id}`)}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
+                            className="text-sm font-medium text-slate-600 hover:text-slate-900"
                             title="View quote details"
                           >
                             View
                           </button>
-                          <span className="text-slate-300">|</span>
                           <button
                             onClick={() => navigate(`/admin/quotes/${quote.id}?edit=1`)}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
+                            className="text-sm font-medium text-slate-600 hover:text-slate-900"
                             title="Edit quote"
                           >
                             Edit
                           </button>
-                          <span className="text-slate-300">|</span>
-                          <button
-                            onClick={async () => {
+                          <span className="text-slate-200 select-none">·</span>
+                          <div className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
+                            <button
+                              onClick={async () => {
                               try {
                                 // Fetch full quote data
                                 const { data: quoteData, error: quoteError } = await supabase
@@ -920,111 +903,96 @@ export default function QuotesAdmin() {
                                 toast.error(err.message || 'Failed to generate PDF')
                               }
                             }}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
+                            className="hover:text-slate-700"
                             title="Generate PDF"
                           >
                             PDF
                           </button>
-                          <span className="text-slate-300">|</span>
-                          {quote.status === 'accepted' && quote.converted_job_id ? (
-                            <button
-                              onClick={() => navigate(`/admin/jobs?openJobId=${quote.converted_job_id}`)}
-                              className="text-blue-600 hover:text-blue-800 text-sm"
-                              title="Open job created from this quote"
-                            >
-                              Open Job
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                // Navigate to quote detail page where conversion can happen
-                                navigate(`/admin/quotes/${quote.id}`)
-                              }}
-                              disabled={quote.status !== 'accepted' || !!quote.converted_job_id}
-                              className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                              title={
-                                quote.status !== 'accepted'
-                                  ? 'Quote must be accepted before converting to job'
-                                  : quote.converted_job_id
-                                  ? 'Job already created from this quote'
-                                  : 'Convert quote to job'
-                              }
-                            >
-                              Convert to Job
-                            </button>
-                          )}
-                          <span className="text-slate-300">|</span>
-                          {quote.status === 'sent' && (
-                            <>
+                            {quote.status === 'accepted' && quote.converted_job_id ? (
                               <button
-                                onClick={() => handleExtendExpiration(quote.id, 14)}
-                                disabled={extendingQuoteId === quote.id}
-                                className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Extend expiration by 14 days"
+                                onClick={() => navigate(`/admin/jobs?openJobId=${quote.converted_job_id}`)}
+                                className="hover:text-slate-700"
+                                title="Open job created from this quote"
                               >
-                                {extendingQuoteId === quote.id ? 'Extending...' : 'Extend 14d'}
+                                Open Job
                               </button>
-                              <span className="text-slate-300">|</span>
+                            ) : (
                               <button
-                                onClick={() => handleResendQuote(quote)}
-                                disabled={resendingQuoteId === quote.id}
-                                className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Resend quote email"
+                                onClick={() => navigate(`/admin/quotes/${quote.id}`)}
+                                disabled={quote.status !== 'accepted' || !!quote.converted_job_id}
+                                className="hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title={
+                                  quote.status !== 'accepted'
+                                    ? 'Quote must be accepted before converting to job'
+                                    : quote.converted_job_id
+                                    ? 'Job already created from this quote'
+                                    : 'Convert quote to job'
+                                }
                               >
-                                {resendingQuoteId === quote.id ? 'Resending...' : 'Resend'}
+                                Convert to Job
                               </button>
-                              <span className="text-slate-300">|</span>
-                              {quote.last_viewed_at && !isExpired && (
-                                <>
+                            )}
+                            {quote.status === 'sent' && (
+                              <>
+                                <button
+                                  onClick={() => handleExtendExpiration(quote.id, 14)}
+                                  disabled={extendingQuoteId === quote.id}
+                                  className="hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Extend expiration by 14 days"
+                                >
+                                  {extendingQuoteId === quote.id ? 'Extending...' : 'Extend 14d'}
+                                </button>
+                                <button
+                                  onClick={() => handleResendQuote(quote)}
+                                  disabled={resendingQuoteId === quote.id}
+                                  className="hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Resend quote email"
+                                >
+                                  {resendingQuoteId === quote.id ? 'Resending...' : 'Resend'}
+                                </button>
+                                {quote.last_viewed_at && !isExpired && (
                                   <button
                                     onClick={() => handleNudgeQuote(quote)}
                                     disabled={nudgingQuoteId === quote.id}
-                                    className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Send follow-up reminder (viewed but no response)"
                                   >
                                     {nudgingQuoteId === quote.id ? 'Nudging...' : 'Nudge'}
                                   </button>
-                                  <span className="text-slate-300">|</span>
-                                </>
-                              )}
-                              {isExpiringSoon && (
-                                <>
+                                )}
+                                {isExpiringSoon && (
                                   <button
                                     onClick={() => handleRemindQuote(quote)}
                                     disabled={remindingQuoteId === quote.id}
-                                    className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Send expiration reminder"
                                   >
                                     {remindingQuoteId === quote.id ? 'Reminding...' : 'Reminder'}
                                   </button>
-                                  <span className="text-slate-300">|</span>
-                                </>
-                              )}
-                            </>
-                          )}
-                          {quote.status === 'expired' && (
-                            <>
-                              <button
-                                onClick={() => handleExtendExpiration(quote.id, 14)}
-                                disabled={extendingQuoteId === quote.id}
-                                className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Extend expiration by 14 days"
-                              >
-                                {extendingQuoteId === quote.id ? 'Extending...' : 'Extend 14d'}
-                              </button>
-                              <span className="text-slate-300">|</span>
-                              <button
-                                onClick={() => handleResendQuote(quote)}
-                                disabled={resendingQuoteId === quote.id}
-                                className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Resend quote email"
-                              >
-                                {resendingQuoteId === quote.id ? 'Resending...' : 'Resend'}
-                              </button>
-                              <span className="text-slate-300">|</span>
-                            </>
-                          )}
-                          <button
+                                )}
+                              </>
+                            )}
+                            {quote.status === 'expired' && (
+                              <>
+                                <button
+                                  onClick={() => handleExtendExpiration(quote.id, 14)}
+                                  disabled={extendingQuoteId === quote.id}
+                                  className="hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Extend expiration by 14 days"
+                                >
+                                  {extendingQuoteId === quote.id ? 'Extending...' : 'Extend 14d'}
+                                </button>
+                                <button
+                                  onClick={() => handleResendQuote(quote)}
+                                  disabled={resendingQuoteId === quote.id}
+                                  className="hover:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Resend quote email"
+                                >
+                                  {resendingQuoteId === quote.id ? 'Resending...' : 'Resend'}
+                                </button>
+                              </>
+                            )}
+                            <button
                             onClick={async () => {
                               try {
                                 // Get current user and profile
@@ -1125,10 +1093,11 @@ export default function QuotesAdmin() {
                                 toast.error(err.message || 'Failed to prepare email')
                               }
                             }}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
+                            className="hover:text-slate-700"
                           >
                             Send
                           </button>
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -1137,7 +1106,7 @@ export default function QuotesAdmin() {
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Compose Email Modal */}

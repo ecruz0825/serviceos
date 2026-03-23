@@ -100,7 +100,7 @@ export default function CalendarMonth({
               key={idx}
               onClick={() => onDayClick(dateKey)}
               className={`
-                min-h-[100px] p-2 bg-white cursor-pointer hover:bg-slate-50/50 transition-colors
+                min-h-[100px] p-2.5 bg-white cursor-pointer hover:bg-slate-50/50 transition-colors
                 ${!inMonth ? 'text-slate-400' : 'text-slate-900'}
                 ${isTodayDate ? 'ring-1 ring-blue-400 ring-inset bg-blue-50/30' : ''}
               `}
@@ -132,9 +132,9 @@ export default function CalendarMonth({
                         onJobPillClick(dateKey, job.id);
                       }}
                       className={`
-                        text-[10px] px-1.5 py-1 rounded truncate
+                        text-[10px] px-1.5 py-1 rounded-lg shadow-sm border border-slate-200/80 truncate
                         ${getStatusColor(job.status)}
-                        ${isHighlighted ? 'ring-2 ring-blue-500 ring-offset-1 shadow-lg z-10' : ''}
+                        ${isHighlighted ? 'ring-2 ring-blue-500 ring-offset-1 shadow-md z-10' : ''}
                         cursor-pointer hover:opacity-90 transition-all
                       `}
                       title={`${title} - ${customerName}${job.job_cost ? ` - $${job.job_cost.toFixed(2)}` : ''}`}

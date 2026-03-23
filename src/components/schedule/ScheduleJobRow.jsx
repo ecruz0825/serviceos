@@ -48,7 +48,7 @@ export default function ScheduleJobRow({
   const formattedRequestDate = requestedDate ? format(parseISO(requestedDate), 'MMM d') : null;
 
   return (
-    <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0 hover:bg-slate-50/50 transition-colors">
+    <div className="flex items-center justify-between gap-4 py-3 px-4 hover:bg-slate-50/50 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h4 className="text-sm font-medium text-slate-900">

@@ -705,19 +705,33 @@ export default function AdminDashboard() {
     }
   };
 
-  const KPICard = ({ label, value, helperText, icon: Icon, iconColor = "text-green-600", onClick }) => (
+  const KPICard = ({
+    label,
+    value,
+    helperText,
+    icon: Icon,
+    iconColor = "text-green-600",
+    onClick,
+    valueTone = "brand", // "brand" | "neutral"
+  }) => (
     <Card clickable={!!onClick} onClick={onClick}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-600 mb-1 truncate">{label}</p>
+          <p className="text-xs font-semibold text-slate-600 truncate">{label}</p>
           <p
-            className="text-2xl sm:text-3xl font-bold mb-1 break-words"
-            style={{ color: "var(--brand-secondary, var(--brand-primary))" }}
+            className={`text-3xl sm:text-4xl font-bold mt-1 break-words ${
+              valueTone === "neutral" ? "text-slate-900" : ""
+            }`}
+            style={
+              valueTone === "brand"
+                ? { color: "var(--brand-secondary, var(--brand-primary))" }
+                : undefined
+            }
           >
             {loading || value === null ? "—" : value}
           </p>
           {helperText && (
-            <div className="text-xs text-slate-500 mt-1">
+            <div className="text-[11px] text-slate-500 mt-1 leading-tight">
               {typeof helperText === "string" ? helperText : helperText}
             </div>
           )}
@@ -745,173 +759,200 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader 
         title="Admin Dashboard" 
         subtitle="Overview of company activity" 
       />
 
-      {/* Greeting / Context Line */}
-      <div className="text-sm text-slate-600 -mt-2">
-        {getGreeting()} — here's what needs attention today.
-      </div>
-
-      {/* Quick Action Bar */}
+      {/* Attention Needed Section (Start of day) */}
       <section>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="primary"
-            onClick={() => navigate("/admin/jobs")}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Create Job
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/admin/payments")}
-            className="flex items-center gap-2"
-          >
-            <CreditCard className="w-4 h-4" />
-            Record Payment
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => navigate("/admin/customers")}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add Customer
-          </Button>
+        <div className="flex items-end justify-between mb-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-slate-500" />
+              <h2 className="text-xl font-semibold tracking-tight text-slate-900">Attention Needed</h2>
+            </div>
+            <p className="text-sm text-slate-600 mt-1">Start here: tackle what’s overdue, then today’s jobs.</p>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-1">
+          <Card>
+            {(() => {
+              const attentionItems = [
+                {
+                  icon: AlertCircle,
+                  iconColor: "text-red-600",
+                  bgColor: "bg-red-50",
+                  borderColor: "border-red-200",
+                  label: "Overdue Jobs",
+                  helper: "Past due date, not completed",
+                  count: kpis.overdueJobs || 0,
+                  action: "View overdue",
+                  onClick: () => {
+                    navigate("/admin/jobs?filter=overdue");
+                  },
+                },
+                {
+                  icon: UserX,
+                  iconColor: "text-amber-600",
+                  bgColor: "bg-amber-50",
+                  borderColor: "border-amber-200",
+                  label: "Unassigned Jobs",
+                  helper: "Needs assignment",
+                  count: kpis.unassignedThisWeek || 0,
+                  action: "Assign now",
+                  onClick: () => {
+                    navigate("/admin/jobs?quickFilter=unassigned");
+                  },
+                },
+                {
+                  icon: Calendar,
+                  iconColor: "text-blue-600",
+                  bgColor: "bg-blue-50",
+                  borderColor: "border-blue-200",
+                  label: "Jobs Today",
+                  helper: "Scheduled for today",
+                  count: kpis.jobsToday || 0,
+                  action: "View today",
+                  onClick: () => {
+                    navigate("/admin/operations?tab=today");
+                  },
+                },
+                {
+                  icon: Clock,
+                  iconColor: "text-purple-600",
+                  bgColor: "bg-purple-50",
+                  borderColor: "border-purple-200",
+                  label: "Upcoming Jobs",
+                  helper: "Next week's schedule",
+                  count: kpis.upcoming7Days || 0,
+                  action: "Open schedule",
+                  onClick: () => {
+                    navigate("/admin/operations?tab=schedule");
+                  },
+                },
+              ];
+
+              const totalCount = attentionItems.reduce((sum, item) => sum + item.count, 0);
+
+              if (loading) {
+                return (
+                  <div className="p-8 text-center">
+                    <div className="inline-block animate-pulse text-slate-400">Loading attention items...</div>
+                  </div>
+                );
+              }
+
+              if (totalCount === 0) {
+                return (
+                  <div className="p-8 text-center">
+                    <p className="text-slate-700 font-medium text-base">All caught up!</p>
+                    <p className="text-sm text-slate-500 mt-1">No items requiring attention at this time.</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="divide-y divide-slate-200">
+                  {attentionItems.map((item, index) => {
+                    const Icon = item.icon;
+                    const hasCount = item.count > 0;
+                    return (
+                      <div
+                        key={index}
+                        className={`py-4 px-4 sm:px-5 flex flex-col sm:flex-row sm:items-center items-start justify-between gap-3 transition-all ${
+                          hasCount
+                            ? `${item.bgColor} border-l-4 ${item.borderColor} hover:shadow-sm`
+                            : "hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0 w-full">
+                          <div className={`${item.iconColor} ${hasCount ? "opacity-100" : "opacity-60"}`}>
+                            <Icon className={`${hasCount ? "w-6 h-6" : "w-5 h-5"}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className={`${
+                                hasCount
+                                  ? "text-sm font-semibold text-slate-900"
+                                  : "text-sm font-medium text-slate-700"
+                              } break-words`}
+                            >
+                              {item.label}
+                            </p>
+                            <p className="text-[11px] text-slate-600 mt-0.5 leading-tight break-words">
+                              {item.helper}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 flex-wrap justify-end w-full sm:w-auto">
+                          <span
+                            className={`${
+                              hasCount ? "text-2xl font-bold" : "text-lg font-semibold"
+                            } text-slate-900 min-w-[3rem] text-right tabular-nums`}
+                          >
+                            {item.count}
+                          </span>
+                          {hasCount && (
+                            <Button
+                              variant="tertiary"
+                              onClick={item.onClick}
+                              className="w-full sm:w-auto px-4 py-2"
+                            >
+                              {item.action}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+          </Card>
         </div>
       </section>
 
-      {/* Attention Needed Section */}
-      <section>
-        <h2 className="text-lg font-semibold text-slate-800 mb-1">Attention Needed</h2>
-        <p className="text-sm text-slate-500 mb-4">Quick actions based on current workload</p>
+      {/* Hero Action Area */}
+      <section className="-mt-2">
         <Card>
-          {(() => {
-            const attentionItems = [
-              {
-                icon: AlertCircle,
-                iconColor: "text-red-600",
-                bgColor: "bg-red-50",
-                borderColor: "border-red-200",
-                label: "Overdue Jobs",
-                helper: "Past due date, not completed",
-                count: kpis.overdueJobs || 0,
-                action: "View overdue",
-                onClick: () => {
-                  navigate("/admin/jobs?filter=overdue");
-                },
-              },
-              {
-                icon: UserX,
-                iconColor: "text-amber-600",
-                bgColor: "bg-amber-50",
-                borderColor: "border-amber-200",
-                label: "Unassigned Jobs",
-                helper: "Needs assignment",
-                count: kpis.unassignedThisWeek || 0,
-                action: "Assign now",
-                onClick: () => {
-                  navigate("/admin/jobs?quickFilter=unassigned");
-                },
-              },
-              {
-                icon: Calendar,
-                iconColor: "text-blue-600",
-                bgColor: "bg-blue-50",
-                borderColor: "border-blue-200",
-                label: "Jobs Today",
-                helper: "Scheduled for today",
-                count: kpis.jobsToday || 0,
-                action: "View today",
-                onClick: () => {
-                  navigate("/admin/operations?tab=today");
-                },
-              },
-              {
-                icon: Clock,
-                iconColor: "text-purple-600",
-                bgColor: "bg-purple-50",
-                borderColor: "border-purple-200",
-                label: "Upcoming Jobs",
-                helper: "Next week's schedule",
-                count: kpis.upcoming7Days || 0,
-                action: "Open schedule",
-                onClick: () => {
-                  navigate("/admin/operations?tab=schedule");
-                },
-              },
-            ];
-
-            const totalCount = attentionItems.reduce((sum, item) => sum + item.count, 0);
-
-            if (loading) {
-              return (
-                <div className="p-8 text-center">
-                  <div className="inline-block animate-pulse text-slate-400">Loading attention items...</div>
-                </div>
-              );
-            }
-
-            if (totalCount === 0) {
-              return (
-                <div className="p-8 text-center">
-                  <p className="text-slate-700 font-medium text-base">All caught up!</p>
-                  <p className="text-sm text-slate-500 mt-1">No items requiring attention at this time.</p>
-                </div>
-              );
-            }
-
-            return (
-              <div className="divide-y divide-slate-200">
-                {attentionItems.map((item, index) => {
-                  const Icon = item.icon;
-                  const hasCount = item.count > 0;
-                  return (
-                    <div
-                      key={index}
-                      className={`py-5 px-5 flex flex-col sm:flex-row sm:items-center items-start justify-between gap-3 transition-all ${
-                        hasCount 
-                          ? `${item.bgColor} border-l-4 ${item.borderColor} hover:shadow-sm` 
-                          : "hover:bg-slate-50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
-                        <div className={`${item.iconColor} ${hasCount ? "opacity-100" : "opacity-60"}`}>
-                          <Icon className={`${hasCount ? "w-6 h-6" : "w-5 h-5"}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`${hasCount ? "text-base font-semibold text-slate-900" : "text-sm font-medium text-slate-700"} break-words`}>
-                            {item.label}
-                          </p>
-                          <p className="text-xs text-slate-500 mt-0.5 break-words">
-                            {item.helper}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 flex-wrap justify-end w-full sm:w-auto">
-                        <span className={`${hasCount ? "text-2xl font-bold" : "text-lg font-semibold"} text-slate-900 min-w-[3rem] text-right`}>
-                          {item.count}
-                        </span>
-                        {hasCount && (
-                          <button
-                            onClick={item.onClick}
-                            className="btn-accent px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 w-full sm:w-auto"
-                          >
-                            {item.action}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <div className="text-sm text-slate-600">
+                {getGreeting()} — pick your next action.
               </div>
-            );
-          })()}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <Button
+                variant="primary"
+                onClick={() => navigate("/admin/jobs")}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 text-sm sm:text-base font-semibold shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Create Job
+              </Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                <Button
+                  variant="tertiary"
+                  onClick={() => navigate("/admin/payments")}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Record Payment
+                </Button>
+                <Button
+                  variant="tertiary"
+                  onClick={() => navigate("/admin/customers")}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Customer
+                </Button>
+              </div>
+            </div>
+          </div>
         </Card>
       </section>
 
@@ -989,7 +1030,7 @@ export default function AdminDashboard() {
             <ExternalLink className="w-3.5 h-3.5" />
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <KPICard
             label="Completed Job Value"
             value={financials.revenueThisMonth !== null ? formatCurrency(financials.revenueThisMonth) : null}
@@ -997,6 +1038,7 @@ export default function AdminDashboard() {
             icon={TrendingUp}
             iconColor="text-green-600"
             onClick={() => navigate("/admin/revenue-hub")}
+            valueTone="neutral"
           />
           <KPICard
             label="Payments Received"
@@ -1005,6 +1047,7 @@ export default function AdminDashboard() {
             icon={CreditCard}
             iconColor="text-blue-600"
             onClick={() => navigate("/admin/payments")}
+            valueTone="neutral"
           />
           <KPICard
             label="Expenses"
@@ -1013,6 +1056,7 @@ export default function AdminDashboard() {
             icon={DollarSign}
             iconColor="text-amber-600"
             onClick={() => navigate("/admin/expenses")}
+            valueTone="neutral"
           />
           <KPICard
             label="Outstanding Invoices"
@@ -1021,6 +1065,7 @@ export default function AdminDashboard() {
             icon={AlertCircle}
             iconColor="text-red-600"
             onClick={() => navigate("/admin/revenue-hub")}
+            valueTone="neutral"
           />
         </div>
       </section>

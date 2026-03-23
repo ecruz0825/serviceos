@@ -2042,7 +2042,7 @@ export default function ScheduleAdmin() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="Schedule"
         subtitle="Plan and manage upcoming work by day and worker."
@@ -2185,183 +2185,103 @@ export default function ScheduleAdmin() {
               </Card>
             )}
 
-            {/* Controls */}
-            <Card>
-        <div className="space-y-4">
-          {/* Top Row: View Toggle + Navigation */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-700">View:</span>
-              <div className="flex border border-slate-300 rounded">
-                <button
-                  onClick={() => handleViewModeChange('agenda')}
-                  className={`px-3 py-1 text-sm ${
-                    viewMode === 'agenda'
-                      ? 'bg-slate-200 font-medium text-slate-900'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Agenda
-                </button>
-                <button
-                  onClick={() => handleViewModeChange('calendar')}
-                  className={`px-3 py-1 text-sm border-l border-slate-300 ${
-                    viewMode === 'calendar'
-                      ? 'bg-slate-200 font-medium text-slate-900'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Calendar
-                </button>
-                <button
-                  onClick={() => handleViewModeChange('week')}
-                  className={`px-3 py-1 text-sm border-l border-slate-300 ${
-                    viewMode === 'week'
-                      ? 'bg-slate-200 font-medium text-slate-900'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Week
-                </button>
-                <button
-                  onClick={() => handleViewModeChange('crew')}
-                  className={`px-3 py-1 text-sm border-l border-slate-300 ${
-                    viewMode === 'crew'
-                      ? 'bg-slate-200 font-medium text-slate-900'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Crew
-                </button>
-                <button
-                  onClick={() => handleViewModeChange('map')}
-                  className={`px-3 py-1 text-sm border-l border-slate-300 ${
-                    viewMode === 'map'
-                      ? 'bg-slate-200 font-medium text-slate-900'
-                      : 'bg-white text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Map
-                </button>
+            {/* Command bar — view, date nav, filters (sticky below topbar) */}
+            <div className="sticky top-14 sm:top-16 z-10 bg-white/95 backdrop-blur border-b border-slate-200 mb-6 rounded-2xl border border-slate-200 shadow-sm px-5 py-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                {/* LEFT: View toggle */}
+                <div className="flex border border-slate-300 rounded-lg overflow-hidden flex-shrink-0">
+                  {['agenda', 'calendar', 'week', 'crew', 'map'].map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => handleViewModeChange(mode)}
+                      className={`px-3 py-2 text-sm font-medium capitalize border-r border-slate-300 last:border-r-0 transition-colors ${
+                        viewMode === mode
+                          ? 'bg-slate-900 text-white'
+                          : 'bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {mode === 'agenda' ? 'Agenda' : mode === 'calendar' ? 'Calendar' : mode === 'week' ? 'Week' : mode === 'crew' ? 'Crew' : 'Map'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* CENTER: Date navigation */}
+                {viewMode === 'agenda' || viewMode === 'week' ? (
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <Button onClick={goToToday} variant="primary" className="text-sm font-semibold px-4 py-2">
+                      Today
+                    </Button>
+                    <Button onClick={goToPrevDay} variant="tertiary" className="text-sm px-3 py-2">
+                      ← Prev
+                    </Button>
+                    <Button onClick={goToNextDay} variant="tertiary" className="text-sm px-3 py-2">
+                      Next →
+                    </Button>
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => {
+                        setSelectedDate(e.target.value);
+                        setDateRange('day');
+                      }}
+                      className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <Button onClick={goToThisMonth} variant="primary" className="text-sm font-semibold px-4 py-2">
+                      This Month
+                    </Button>
+                    <Button onClick={goToPrevMonth} variant="tertiary" className="text-sm px-3 py-2">
+                      ← Prev
+                    </Button>
+                    <Button onClick={goToNextMonth} variant="tertiary" className="text-sm px-3 py-2">
+                      Next →
+                    </Button>
+                    <span className="text-sm font-semibold text-slate-900 min-w-[8rem]">
+                      {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </span>
+                  </div>
+                )}
+
+                {/* RIGHT: Filters */}
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="schedule-crew-filter" className="text-sm font-medium text-slate-700 whitespace-nowrap">
+                      {crewLabel}:
+                    </label>
+                    <select
+                      id="schedule-crew-filter"
+                      value={selectedCrew}
+                      onChange={(e) => setSelectedCrew(e.target.value)}
+                      className="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent min-w-[8rem]"
+                    >
+                      <option value="">All</option>
+                      {teams.map(team => {
+                        const memberCount = teamMembers.filter(tm => tm.team_id === team.id).length;
+                        const displayName = memberCount === 1 
+                          ? (teamMembers.find(tm => tm.team_id === team.id)?.crew_members?.full_name || team.name)
+                          : team.name;
+                        return (
+                          <option key={team.id} value={team.id}>
+                            {displayName}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={includeCanceled}
+                      onChange={(e) => setIncludeCanceled(e.target.checked)}
+                      className="rounded border-slate-300 text-slate-700 focus:ring-slate-400"
+                    />
+                    <span className="text-sm text-slate-700">Include Canceled</span>
+                  </label>
+                </div>
               </div>
             </div>
-
-            {/* Navigation */}
-            {viewMode === 'agenda' || viewMode === 'week' ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <Button onClick={goToToday} variant="secondary" className="text-sm">
-                  Today
-                </Button>
-                <Button onClick={goToPrevDay} variant="tertiary" className="text-sm">
-                  ← Prev
-                </Button>
-                <Button onClick={goToNextDay} variant="tertiary" className="text-sm">
-                  Next →
-                </Button>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => {
-                    setSelectedDate(e.target.value);
-                    setDateRange('day');
-                  }}
-                  className="border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-                />
-              </div>
-            ) : (
-              <div className="flex flex-wrap items-center gap-2">
-                <Button onClick={goToThisMonth} variant="secondary" className="text-sm">
-                  This Month
-                </Button>
-                <Button onClick={goToPrevMonth} variant="tertiary" className="text-sm">
-                  ← Prev
-                </Button>
-                <Button onClick={goToNextMonth} variant="tertiary" className="text-sm">
-                  Next →
-                </Button>
-                <span className="text-base font-semibold text-slate-900">
-                  {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Second Row: Quick Chips + Filters */}
-          <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-slate-200">
-            {/* Quick Range Chips (only for agenda) */}
-            {viewMode === 'agenda' && (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-slate-700">Quick:</span>
-                <button
-                  onClick={() => setQuickRange('today')}
-                  className={`px-3 py-1 rounded-full text-sm border transition ${
-                    dateRange === 'day' && selectedDate === new Date().toISOString().split('T')[0]
-                      ? 'bg-slate-200 font-medium border-slate-400'
-                      : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  Today
-                </button>
-                <button
-                  onClick={() => setQuickRange('tomorrow')}
-                  className={`px-3 py-1 rounded-full text-sm border transition ${
-                    dateRange === 'day' && selectedDate === new Date(Date.now() + 86400000).toISOString().split('T')[0]
-                      ? 'bg-slate-200 font-medium border-slate-400'
-                      : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  Tomorrow
-                </button>
-                <button
-                  onClick={() => setQuickRange('week')}
-                  className={`px-3 py-1 rounded-full text-sm border transition ${
-                    dateRange === 'week'
-                      ? 'bg-slate-200 font-medium border-slate-400'
-                      : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-700'
-                  }`}
-                >
-                  This Week
-                </button>
-              </div>
-            )}
-
-            {/* Filters */}
-            <div className="flex flex-wrap items-center gap-4 ml-auto">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-slate-700">{crewLabel}:</label>
-              <select
-                value={selectedCrew}
-                onChange={(e) => setSelectedCrew(e.target.value)}
-                className="border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-              >
-                <option value="">All Workers</option>
-                {teams.map(team => {
-                  const memberCount = teamMembers.filter(tm => tm.team_id === team.id).length;
-                  const displayName = memberCount === 1 
-                    ? (teamMembers.find(tm => tm.team_id === team.id)?.crew_members?.full_name || team.name)
-                    : team.name;
-                  return (
-                    <option key={team.id} value={team.id}>
-                      {displayName}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={includeCanceled}
-                onChange={(e) => setIncludeCanceled(e.target.checked)}
-                className="rounded border-slate-300"
-              />
-              <span className="text-sm text-slate-700">Include Canceled</span>
-            </label>
-          </div>
-            </div>
-          </div>
-        </Card>
 
         <Card>
           <div className="flex items-start justify-between gap-3 mb-4">
@@ -2486,37 +2406,31 @@ export default function ScheduleAdmin() {
           )}
         </Card>
 
-        {/* Content */}
+        {/* Schedule canvas — main focus */}
+        <div className="mt-10 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
         {loading ? (
-        <Card>
-          <div className="p-8 text-center text-slate-500">Loading schedule...</div>
-        </Card>
+          <div className="py-12 text-center text-slate-500">Loading schedule...</div>
       ) : viewMode === 'agenda' ? (
         sortedDateKeys.length === 0 ? (
-          <Card>
-            <div className="p-8 text-center">
-              <p className="text-slate-600 mb-4">No jobs scheduled</p>
-              <Button onClick={handleCreateJob} variant="secondary">
-                Create Job
-              </Button>
-            </div>
-          </Card>
+          <div className="py-12 text-center">
+            <p className="text-slate-600 mb-4">No jobs scheduled</p>
+            <Button onClick={handleCreateJob} variant="secondary">
+              Create Job
+            </Button>
+          </div>
         ) : (
-          <Card>
-            <div className="space-y-4">
-              {sortedDateKeys.map(dateKey => (
-                <div key={dateKey} className="border-b border-slate-200 last:border-b-0 pb-4 last:pb-0">
-                  <div className="pb-3 mb-2">
-                    <h3 className="text-sm font-semibold text-slate-700">
-                      {formatDateHeader(dateKey)}
-                    </h3>
-                  </div>
-                  <div className="divide-y divide-slate-100">
-                    {filteredAndGroupedJobs[dateKey].map(job => {
-                      const customer = customersById[job.customer_id];
-                      return (
+          <div className="space-y-6">
+            {sortedDateKeys.map(dateKey => (
+              <div key={dateKey}>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                  {formatDateHeader(dateKey)}
+                </h3>
+                <div className="space-y-2">
+                  {filteredAndGroupedJobs[dateKey].map(job => {
+                    const customer = customersById[job.customer_id];
+                    return (
+                      <div key={job.id} className="rounded-lg shadow-sm border border-slate-200 bg-white overflow-hidden">
                         <ScheduleJobRow
-                          key={job.id}
                           job={job}
                           customer={customer}
                           crewMembers={crewMembers}
@@ -2527,17 +2441,16 @@ export default function ScheduleAdmin() {
                           onAssignCrew={handleAssignCrew}
                           scheduleRequestByJobId={scheduleRequestByJobId}
                         />
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          </Card>
+              </div>
+            ))}
+          </div>
         )
       ) : viewMode === 'week' ? (
-        <Card>
-          <div className="overflow-x-auto">
+        <div className="overflow-x-auto -m-1 p-1">
             <CalendarWeek
               jobs={weekViewJobs}
               weekStart={weekStartDate}
@@ -2551,7 +2464,6 @@ export default function ScheduleAdmin() {
               scheduleRequestByJobId={scheduleRequestByJobId}
             />
           </div>
-        </Card>
       ) : viewMode === 'crew' ? (
         <DndContext
           sensors={sensors}
@@ -2560,8 +2472,7 @@ export default function ScheduleAdmin() {
           onDragEnd={handleCrewDragEnd}
           onDragCancel={handleCrewDragCancel}
         >
-          <Card>
-            <div className="space-y-6">
+          <div className="space-y-6">
               {Object.keys(jobsByCrew).length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="text-slate-600 mb-4">No jobs scheduled</p>
@@ -2608,7 +2519,6 @@ export default function ScheduleAdmin() {
                   })
                 )}
               </div>
-            </Card>
             <DragOverlay>
               {draggedJob ? (
                 <CrewJobDragPreview job={draggedJob} customersById={customersById} />
@@ -2616,7 +2526,7 @@ export default function ScheduleAdmin() {
             </DragOverlay>
           </DndContext>
       ) : viewMode === 'map' ? (
-        <Card>
+        <div className="min-h-[400px]">
           <MapDispatchView
             jobs={mapViewJobs}
             customers={customers}
@@ -2626,10 +2536,9 @@ export default function ScheduleAdmin() {
             getCrewColor={getCrewColor}
             onOpenJob={handleOpenJob}
           />
-        </Card>
+        </div>
       ) : (
-        <Card>
-          <div className="overflow-x-auto">
+        <div className="overflow-x-auto -m-1 p-1">
             <CalendarMonth
               currentMonth={currentMonth}
               jobsByDate={jobsByDate}
@@ -2640,8 +2549,8 @@ export default function ScheduleAdmin() {
               scheduleRequestByJobId={scheduleRequestByJobId}
             />
           </div>
-          </Card>
         )}
+        </div>
 
         {/* Day Jobs Drawer */}
           <DayJobsDrawer

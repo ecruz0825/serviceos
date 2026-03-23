@@ -1914,72 +1914,81 @@ ${brandName}`;
   }, [scheduleRequests])
 
 
+  const resultsGap = density === 'compact' ? 'gap-4' : 'gap-6';
+  const listSpacing = density === 'compact' ? 'space-y-4' : 'space-y-6';
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Jobs"
-        subtitle="Manage, assign, invoice, and track jobs."
-        actions={
-          <div className="flex gap-2">
-            <Button
-              onClick={() => navigate('/admin/schedule?tab=needs-scheduling')}
-              className="btn-secondary px-4 py-2"
-            >
-              Needs Scheduling
-            </Button>
-            <BillingGuard>
+    <div>
+      <div className="mb-8">
+        <PageHeader
+          title="Jobs"
+          subtitle="Manage, assign, invoice, and track jobs."
+          actions={
+            <div className="flex gap-2">
               <Button
-                onClick={openNewJobForm}
-                className="btn-accent px-4 py-2"
-                disabled={supportMode || billingDisabled}
-                title={supportMode ? "Job creation is disabled in support mode" : billingDisabled ? billingReason : undefined}
+                onClick={() => navigate('/admin/schedule?tab=needs-scheduling')}
+                className="btn-secondary px-4 py-2"
               >
-                + New Job
+                Needs Scheduling
               </Button>
-            </BillingGuard>
-          </div>
-        }
-      />
+              <BillingGuard>
+                <Button
+                  onClick={openNewJobForm}
+                  className="btn-accent px-4 py-2"
+                  disabled={supportMode || billingDisabled}
+                  title={supportMode ? "Job creation is disabled in support mode" : billingDisabled ? billingReason : undefined}
+                >
+                  + New Job
+                </Button>
+              </BillingGuard>
+            </div>
+          }
+        />
+      </div>
 
       {/* Plan Usage */}
-      <LimitCard
-        label="Jobs This Month"
-        current={usage.current_jobs_this_month}
-        limit={limits.max_jobs_per_month}
-        isLoading={limitsLoading}
-      />
+      <div className="mb-4">
+          <LimitCard
+          label="Jobs This Month"
+          current={usage.current_jobs_this_month}
+          limit={limits.max_jobs_per_month}
+          isLoading={limitsLoading}
+        />
+      </div>
 
       {/* Approaching Limit Warning */}
-      <LimitWarningBanner
-        label="Jobs This Month"
-        current={usage.current_jobs_this_month}
-        limit={limits.max_jobs_per_month}
-        isLoading={limitsLoading}
-      />
+      <div className="mb-6">
+          <LimitWarningBanner
+          label="Jobs This Month"
+          current={usage.current_jobs_this_month}
+          limit={limits.max_jobs_per_month}
+          isLoading={limitsLoading}
+        />
+      </div>
 
-      {/* View Controls */}
-      <Card>
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Density Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-700">Density:</span>
-            <div className="flex border border-slate-300 rounded">
+      {/* View Controls — premium command bar */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4 mb-6">
+        <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+          {/* Density */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Density</span>
+            <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-slate-50/50">
               <button
                 onClick={() => setDensity('comfortable')}
-                className={`px-3 py-1 text-sm ${
+                className={`px-3.5 py-2 text-sm font-medium transition-colors ${
                   density === 'comfortable'
-                    ? 'bg-slate-200 font-medium text-slate-900'
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 Comfortable
               </button>
               <button
                 onClick={() => setDensity('compact')}
-                className={`px-3 py-1 text-sm border-l border-slate-300 ${
+                className={`px-3.5 py-2 text-sm font-medium border-l border-slate-200 transition-colors ${
                   density === 'compact'
-                    ? 'bg-slate-200 font-medium text-slate-900'
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 Compact
@@ -1987,36 +1996,36 @@ ${brandName}`;
             </div>
           </div>
 
-          {/* Layout Toggle (Desktop only) */}
-          <div className="hidden sm:flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-700">Layout:</span>
-            <div className="flex border border-slate-300 rounded">
+          {/* Layout (Desktop only) */}
+          <div className="hidden sm:flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 border-l border-slate-200 pl-6 sm:pl-8">
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Layout</span>
+            <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-slate-50/50">
               <button
                 onClick={() => setLayout('list')}
-                className={`px-3 py-1 text-sm ${
+                className={`px-3.5 py-2 text-sm font-medium transition-colors ${
                   layout === 'list'
-                    ? 'bg-slate-200 font-medium text-slate-900'
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 List
               </button>
               <button
                 onClick={() => setLayout('two-column')}
-                className={`px-3 py-1 text-sm border-l border-slate-300 ${
+                className={`px-3.5 py-2 text-sm font-medium border-l border-slate-200 transition-colors ${
                   layout === 'two-column'
-                    ? 'bg-slate-200 font-medium text-slate-900'
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 Two-column
               </button>
               <button
                 onClick={() => setLayout('three-column')}
-                className={`px-3 py-1 text-sm border-l border-slate-300 ${
+                className={`px-3.5 py-2 text-sm font-medium border-l border-slate-200 transition-colors ${
                   layout === 'three-column'
-                    ? 'bg-slate-200 font-medium text-slate-900'
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
                 Three-column
@@ -2025,9 +2034,9 @@ ${brandName}`;
           </div>
 
           {/* Quick Filters */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-slate-700">Quick Filters:</span>
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 border-t border-slate-200 pt-4 sm:pt-0 sm:border-t-0 sm:border-l border-slate-200 sm:pl-6 sm:pl-8 w-full sm:w-auto">
+            <span className="text-xs font-medium text-slate-500 uppercase tracking-wide shrink-0">Quick Filters</span>
+            <div className="flex flex-wrap gap-1.5">
               {['all', 'pending', 'completed', 'upcoming', 'unassigned'].map((filter) => (
                 <button
                   key={filter}
@@ -2043,10 +2052,10 @@ ${brandName}`;
                     setSearchParams(newParams, { replace: true });
                     applyFilters(statusFilter, selectedCrew, searchTerm, allJobs, filter, overdueFilter);
                   }}
-                  className={`px-3 py-1 rounded-full text-sm border transition ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     quickFilter === filter
-                      ? 'bg-slate-200 font-medium border-slate-400'
-                      : 'bg-white border-slate-300 hover:bg-slate-100 text-slate-700'
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
                   }`}
                 >
                   {filter.charAt(0).toUpperCase() + filter.slice(1)}
@@ -2055,12 +2064,13 @@ ${brandName}`;
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Active Filters Row */}
       {(overdueFilter || (quickFilter === 'unassigned' && quickFilter !== 'all')) && (
-        <Card>
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="mb-6">
+          <Card>
+            <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-medium text-slate-700">Active Filters:</span>
             <div className="flex flex-wrap gap-2">
               {overdueFilter && (
@@ -2101,11 +2111,13 @@ ${brandName}`;
               )}
             </div>
           </div>
-        </Card>
+          </Card>
+        </div>
       )}
 
-      <Card>
-        <div className="flex flex-wrap gap-4">
+      <div className="mb-8">
+        <Card>
+          <div className="flex flex-wrap gap-4">
         <select
           value={statusFilter}
           onChange={e => {
@@ -2177,15 +2189,17 @@ ${brandName}`;
         >
           Reset
         </Button>
-        </div>
-      </Card>
-
-      {loading ? (
-        <Card>
-          <LoadingSpinner size="md" text="Loading jobs..." className="py-6" />
+          </div>
         </Card>
+      </div>
+
+      {/* Jobs results — main work area */}
+      {loading ? (
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-8 min-h-[200px] flex items-center justify-center">
+          <LoadingSpinner size="md" text="Loading jobs..." className="py-6" />
+        </div>
       ) : jobs.length === 0 ? (
-        <Card>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-8">
           <EmptyState
             icon={Briefcase}
             title={allJobs.length === 0 ? "No jobs yet" : "No jobs match your filters"}
@@ -2206,15 +2220,15 @@ ${brandName}`;
               setJobs(allJobs);
             }}
           />
-        </Card>
+        </div>
       ) : (
-        <Card>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 sm:p-6">
           <div className={
-            layout === 'list' 
-              ? 'space-y-4' 
-              : layout === 'two-column' 
-                ? 'grid sm:grid-cols-2 gap-4' 
-                : 'grid xl:grid-cols-3 gap-4'
+            layout === 'list'
+              ? listSpacing
+              : layout === 'two-column'
+                ? `grid sm:grid-cols-2 ${resultsGap}`
+                : `grid xl:grid-cols-3 ${resultsGap}`
           }>
             {jobs.map((job) => {
               // Handle missing customer gracefully
@@ -2334,12 +2348,13 @@ ${brandName}`;
               );
             })}
           </div>
-        </Card>
+        </div>
       )}
 
       <Drawer
         open={isFormOpen}
         title={editingJob ? 'Edit Job' : 'New Job'}
+        widthClass="w-full max-w-[720px]"
         onClose={() => {
           setIsFormOpen(false)
           // Clean up URL params if they exist
@@ -2352,7 +2367,7 @@ ${brandName}`;
         }}
         disableClose={isSaving}
         footer={
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3">
             <Button
               variant="tertiary"
               onClick={() => {
@@ -2386,21 +2401,25 @@ ${brandName}`;
         <form onSubmit={saveJob} id="job-form">
           {/* Uniform input styling */}
           {(() => {
-            const inputClass = "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-300";
+            const inputClass = "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-300";
             const selectClass = inputClass;
-            const textareaClass = inputClass + " resize-y";
+            const textareaClass = inputClass + " resize-y min-h-[100px]";
+            const sectionHeaderClass = "flex items-center gap-2 mb-4";
+            const sectionTitleClass = "text-xs font-semibold text-slate-500 uppercase tracking-wide";
+            const labelClass = "block text-sm font-medium text-slate-700";
+            const helperClass = "text-xs text-slate-500 mt-1";
             
             return (
-              <div className="space-y-5">
+              <div className="space-y-0">
                 {/* Details Section */}
-                <section className="pt-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <ClipboardList className="h-4 w-4 text-slate-500" />
-                    <h3 className="text-sm font-semibold text-slate-900">Details</h3>
+                <section className="pt-2 pb-8">
+                  <div className={sectionHeaderClass}>
+                    <ClipboardList className="h-4 w-4 text-slate-400" />
+                    <h3 className={sectionTitleClass}>Details</h3>
                   </div>
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>
                         Title <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -2416,8 +2435,8 @@ ${brandName}`;
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">Service Type</label>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Service Type</label>
                       <input
                         type="text"
                         value={formData.services_performed}
@@ -2435,8 +2454,8 @@ ${brandName}`;
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="block text-sm font-medium text-slate-700">
+                      <div className="space-y-1.5">
+                        <label className={labelClass}>
                           {customerLabel} <span className="text-red-500">*</span>
                         </label>
                         <select
@@ -2459,8 +2478,8 @@ ${brandName}`;
                         </select>
                       </div>
 
-                      <div className="space-y-1">
-                        <label className="block text-sm font-medium text-slate-700">Assigned Team</label>
+                      <div className="space-y-1.5">
+                        <label className={labelClass}>Assigned Team</label>
                         <select
                           value={formData.assigned_team_id}
                           onChange={e => {
@@ -2484,17 +2503,15 @@ ${brandName}`;
                   </div>
                 </section>
 
-                <div className="border-t border-slate-200" />
-
                 {/* Scheduling Section */}
-                <section ref={schedulingSectionRef} className="pt-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-slate-500" />
-                    <h3 className="text-sm font-semibold text-slate-900">Scheduling</h3>
+                <section ref={schedulingSectionRef} className="pt-8 pb-8 border-t border-slate-100">
+                  <div className={sectionHeaderClass}>
+                    <Calendar className="h-4 w-4 text-slate-400" />
+                    <h3 className={sectionTitleClass}>Scheduling</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>
                         Service Date <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -2521,10 +2538,8 @@ ${brandName}`;
                       />
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">
-                        End Date
-                      </label>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>End Date</label>
                       <input
                         type="date"
                         value={formData.scheduled_end_date}
@@ -2548,13 +2563,13 @@ ${brandName}`;
                         disabled={billingDisabled}
                         readOnly={billingDisabled}
                       />
-                      <p className="text-xs text-slate-500">Job end date (multi-day span)</p>
+                      <p className={helperClass}>Job end date (multi-day span)</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">Status</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Status</label>
                       <select
                         value={formData.status}
                         onChange={e =>
@@ -2573,17 +2588,15 @@ ${brandName}`;
                   </div>
                 </section>
 
-                <div className="border-t border-slate-200" />
-
                 {/* Pricing Section */}
-                <section className="pt-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-slate-500" />
-                    <h3 className="text-sm font-semibold text-slate-900">Pricing</h3>
+                <section className="pt-8 pb-8 border-t border-slate-100">
+                  <div className={sectionHeaderClass}>
+                    <DollarSign className="h-4 w-4 text-slate-400" />
+                    <h3 className={sectionTitleClass}>Pricing</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">Price</label>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Price</label>
                       <input
                         type="number"
                         step="0.01"
@@ -2596,8 +2609,8 @@ ${brandName}`;
                         readOnly={billingDisabled}
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">Labor Pay</label>
+                    <div className="space-y-1.5">
+                      <label className={labelClass}>Labor Pay</label>
                       <input
                         type="number"
                         step="0.01"
@@ -2609,58 +2622,62 @@ ${brandName}`;
                         disabled={billingDisabled}
                         readOnly={billingDisabled}
                       />
-                      <p className="text-xs text-slate-500 mt-1">Internal payout estimate (optional)</p>
+                      <p className={helperClass}>Internal payout estimate (optional)</p>
                     </div>
                   </div>
                 </section>
 
-                <div className="border-t border-slate-200" />
-
                 {/* Images Section */}
-                <section className="pt-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <ImageIcon className="h-4 w-4 text-slate-500" />
-                    <h3 className="text-sm font-semibold text-slate-900">Images</h3>
+                <section className="pt-8 pb-8 border-t border-slate-100">
+                  <div className={sectionHeaderClass}>
+                    <ImageIcon className="h-4 w-4 text-slate-400" />
+                    <h3 className={sectionTitleClass}>Images</h3>
                   </div>
-                  <div className="space-y-3">
-                    {/* Show existing images if they exist */}
-                    {formData.before_image && !formData.beforeFile && (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-700">Existing Before Image:</p>
-                        <a
-                          href={formData.before_image}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src={formData.before_image}
-                            alt="Before"
-                            className="w-32 h-32 object-cover rounded border mt-1"
-                          />
-                        </a>
+                  <div className="space-y-6">
+                    {/* Existing images — side-by-side when both exist */}
+                    {(formData.before_image && !formData.beforeFile) || (formData.after_image && !formData.afterFile) ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {formData.before_image && !formData.beforeFile && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Existing Before</p>
+                            <a
+                              href={formData.before_image}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block rounded-xl border border-slate-200 overflow-hidden bg-slate-50/50 hover:border-slate-300 transition-colors"
+                            >
+                              <img
+                                src={formData.before_image}
+                                alt="Before"
+                                className="w-full aspect-square object-cover max-h-44"
+                              />
+                            </a>
+                          </div>
+                        )}
+                        {formData.after_image && !formData.afterFile && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Existing After</p>
+                            <a
+                              href={formData.after_image}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block rounded-xl border border-slate-200 overflow-hidden bg-slate-50/50 hover:border-slate-300 transition-colors"
+                            >
+                              <img
+                                src={formData.after_image}
+                                alt="After"
+                                className="w-full aspect-square object-cover max-h-44"
+                              />
+                            </a>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ) : null}
 
-                    {formData.after_image && !formData.afterFile && (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-slate-700">Existing After Image:</p>
-                        <a
-                          href={formData.after_image}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src={formData.after_image}
-                            alt="After"
-                            className="w-32 h-32 object-cover rounded border mt-1"
-                          />
-                        </a>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-slate-700">Before Image</label>
+                    {/* Upload controls — balanced two-column */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                        <label className={labelClass}>Before Image</label>
                         <input
                           ref={beforeFileRef}
                           type="file"
@@ -2676,29 +2693,30 @@ ${brandName}`;
                             <Button
                               type="button"
                               variant="tertiary"
+                              size="sm"
                               onClick={() => beforeFileRef.current?.click()}
                               disabled={billingDisabled}
                             >
                               Upload
                             </Button>
                           </BillingGuard>
-                          <div className="text-sm text-slate-600 truncate flex-1">
+                          <span className="text-sm text-slate-500 truncate flex-1">
                             {formData.beforeFile ? formData.beforeFile.name : "No file selected"}
-                          </div>
+                          </span>
                         </div>
                         {beforePreviewUrl && (
-                          <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2">
+                          <div className="mt-3 rounded-lg border border-slate-200 bg-white p-2 overflow-hidden">
                             <img
                               src={beforePreviewUrl}
                               alt="Before preview"
-                              className="w-full rounded-md object-cover max-h-40"
+                              className="w-full rounded-md object-cover max-h-36"
                             />
                           </div>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="block text-sm font-medium text-slate-700">After Image</label>
+                      <div className="rounded-xl border border-slate-100 bg-slate-50/30 p-4 space-y-3">
+                        <label className={labelClass}>After Image</label>
                         <input
                           ref={afterFileRef}
                           type="file"
@@ -2714,22 +2732,23 @@ ${brandName}`;
                             <Button
                               type="button"
                               variant="tertiary"
+                              size="sm"
                               onClick={() => afterFileRef.current?.click()}
                               disabled={billingDisabled}
                             >
                               Upload
                             </Button>
                           </BillingGuard>
-                          <div className="text-sm text-slate-600 truncate flex-1">
+                          <span className="text-sm text-slate-500 truncate flex-1">
                             {formData.afterFile ? formData.afterFile.name : "No file selected"}
-                          </div>
+                          </span>
                         </div>
                         {afterPreviewUrl && (
-                          <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2">
+                          <div className="mt-3 rounded-lg border border-slate-200 bg-white p-2 overflow-hidden">
                             <img
                               src={afterPreviewUrl}
                               alt="After preview"
-                              className="w-full rounded-md object-cover max-h-40"
+                              className="w-full rounded-md object-cover max-h-36"
                             />
                           </div>
                         )}
@@ -2738,108 +2757,102 @@ ${brandName}`;
                   </div>
                 </section>
 
-                <div className="border-t border-slate-200" />
-
-                {/* Financial Actions Section */}
-                <section ref={invoiceSectionRef} className="pt-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-slate-500" />
-                    <h3 className="text-sm font-semibold text-slate-900">Financial Actions</h3>
+                {/* Financial Actions Section — one workspace */}
+                <section ref={invoiceSectionRef} className="pt-8 pb-8 border-t border-slate-100">
+                  <div className={sectionHeaderClass}>
+                    <DollarSign className="h-4 w-4 text-slate-400" />
+                    <h3 className={sectionTitleClass}>Financial Actions</h3>
                   </div>
-                  <div className="space-y-3">
-                    {editingJob && (() => {
-                      const customer = customers.find(c => c.id === editingJob.customer_id) || null;
-                      const invoice = invoicesByJob[editingJob.id];
-                      // Filter payments for this invoice (if invoice exists)
-                      const invoicePayments = invoice && paymentsByJob[editingJob.id]
-                        ? paymentsByJob[editingJob.id].records.filter(p => p.invoice_id === invoice.id)
-                        : [];
-                      
-                      return (
-                        <div className="space-y-3">
-                          {/* Create Quote Button */}
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              if (editingJob.customer_id) {
-                                navigate(`/admin/quotes/new?customer_id=${editingJob.customer_id}`);
-                              } else {
-                                toast.error('Customer not found for this job');
-                              }
-                            }}
-                            className="w-full flex items-center justify-center gap-2"
-                            disabled={!editingJob.customer_id}
-                            title={editingJob.customer_id ? 'Create a quote for this customer' : 'Customer not found'}
-                          >
-                            <FileText className="h-4 w-4" />
-                            Create Quote
-                          </Button>
-                          
-                          {/* Invoice Actions */}
-                          <div>
-                            <p className="text-xs font-medium text-slate-600 mb-2">Invoice</p>
-                            <InvoiceActions
-                              job={editingJob}
-                              invoice={invoice}
-                              payments={invoicePayments}
-                              onGenerateInvoice={handleGenerateInvoice}
-                              onEmailInvoice={handleEmailInvoice}
-                              onViewInvoice={handleInvoiceDownload}
-                              onDownloadInvoice={handleInvoiceDownload}
-                              supportMode={supportMode}
-                              billingDisabled={billingDisabled}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })()}
-                    {!editingJob && (
-                      <p className="text-sm text-slate-500">Save the job first to access financial actions</p>
-                    )}
-                  </div>
+                  {editingJob ? (() => {
+                    const invoice = invoicesByJob[editingJob.id];
+                    const invoicePayments = invoice && paymentsByJob[editingJob.id]
+                      ? paymentsByJob[editingJob.id].records.filter(p => p.invoice_id === invoice.id)
+                      : [];
+                    return (
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-5 space-y-5">
+                      {/* Create Quote — primary action in workspace */}
+                      <div>
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Quote</p>
+                        <Button
+                          variant="secondary"
+                          onClick={() => {
+                            if (editingJob.customer_id) {
+                              navigate(`/admin/quotes/new?customer_id=${editingJob.customer_id}`);
+                            } else {
+                              toast.error('Customer not found for this job');
+                            }
+                          }}
+                          className="w-full sm:w-auto flex items-center justify-center gap-2"
+                          disabled={!editingJob.customer_id}
+                          title={editingJob.customer_id ? 'Create a quote for this customer' : 'Customer not found'}
+                        >
+                          <FileText className="h-4 w-4" />
+                          Create Quote
+                        </Button>
+                      </div>
+                      {/* Invoice — grouped in same workspace */}
+                      <div className="pt-4 border-t border-slate-100">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-3">Invoice</p>
+                        <InvoiceActions
+                          job={editingJob}
+                          invoice={invoice}
+                          payments={invoicePayments}
+                          onGenerateInvoice={handleGenerateInvoice}
+                          onEmailInvoice={handleEmailInvoice}
+                          onViewInvoice={handleInvoiceDownload}
+                          onDownloadInvoice={handleInvoiceDownload}
+                          supportMode={supportMode}
+                            billingDisabled={billingDisabled}
+                        />
+                      </div>
+                    </div>
+                    );
+                  })() : (
+                    <p className="text-sm text-slate-500">Save the job first to access financial actions</p>
+                  )}
                 </section>
 
-                <div className="border-t border-slate-200" />
-
-                {/* Payment Section */}
-                <section ref={paymentSectionRef} className="pt-5 space-y-2">
+                {/* Payment History Section */}
+                <section ref={paymentSectionRef} className="pt-8 pb-8 border-t border-slate-100">
                   {editingJob ? (
-                    <PaymentHistory
-                      paymentData={paymentsByJob[editingJob.id]}
-                      jobCost={editingJob.job_cost || 0}
-                      showHeader={true}
-                      emptyMessage={editingJob.id ? "No payments recorded" : "Save the job first to view payment history"}
-                    />
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-5">
+                      <PaymentHistory
+                        paymentData={paymentsByJob[editingJob.id]}
+                        jobCost={editingJob.job_cost || 0}
+                        showHeader={true}
+                        emptyMessage={editingJob.id ? "No payments recorded" : "Save the job first to view payment history"}
+                        className="space-y-4"
+                      />
+                    </div>
                   ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-slate-500" />
-                        <h3 className="text-sm font-semibold text-slate-900">Payment History</h3>
+                    <div className="space-y-2">
+                      <div className={sectionHeaderClass}>
+                        <DollarSign className="h-4 w-4 text-slate-400" />
+                        <h3 className={sectionTitleClass}>Payment History</h3>
                       </div>
                       <p className="text-sm text-slate-500">Save the job first to view payment history</p>
                     </div>
                   )}
                 </section>
 
-                <div className="border-t border-slate-200" />
-
                 {/* Notes Section */}
-                <section className="pt-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <StickyNote className="h-4 w-4 text-slate-500" />
-                    <h3 className="text-sm font-semibold text-slate-900">Notes</h3>
+                <section className="pt-8 pb-8 border-t border-slate-100">
+                  <div className={sectionHeaderClass}>
+                    <StickyNote className="h-4 w-4 text-slate-400" />
+                    <h3 className={sectionTitleClass}>Notes</h3>
                   </div>
-                  <div className="space-y-1">
-                    <label className="block text-sm font-medium text-slate-700">Details</label>
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/30 p-4 mt-4">
+                    <label className={labelClass}>Details</label>
                     <textarea
                       value={formData.details}
                       onChange={e =>
                         setFormData({ ...formData, details: e.target.value })
                       }
-                      className={textareaClass}
-                      rows={4}
+                      className={`${textareaClass} mt-2`}
+                      rows={5}
                       disabled={billingDisabled}
                       readOnly={billingDisabled}
+                      placeholder="Job notes, instructions, or follow-up..."
                     />
                   </div>
                 </section>

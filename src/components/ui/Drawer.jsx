@@ -9,7 +9,7 @@ import { useEffect } from 'react';
  * @param {React.ReactNode} props.children - Drawer content
  * @param {React.ReactNode} [props.footer] - Optional footer content
  * @param {Function} props.onClose - Close handler
- * @param {string} [props.widthClass] - Width classes (default: "w-full sm:w-[520px]")
+ * @param {string} [props.widthClass] - Width classes (default: "w-full sm:max-w-[520px]")
  * @param {boolean} [props.disableClose] - Disable closing (e.g., when saving)
  */
 export default function Drawer({
@@ -18,7 +18,7 @@ export default function Drawer({
   children,
   footer,
   onClose,
-  widthClass = "w-full sm:w-[520px]",
+  widthClass = "w-full sm:max-w-[520px]",
   disableClose = false,
 }) {
   // Handle ESC key
@@ -82,7 +82,7 @@ export default function Drawer({
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
           {children}
         </div>
 

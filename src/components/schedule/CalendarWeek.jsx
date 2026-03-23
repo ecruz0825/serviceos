@@ -498,15 +498,15 @@ function DraggableJob({ job, getStatusColor, onJobOpen, dateKey, onDayClick, seg
   const getBorderRadius = (type) => {
     switch (type) {
       case 'single':
-        return 'rounded-md';
+        return 'rounded-lg';
       case 'start':
-        return 'rounded-l-md rounded-r-none';
+        return 'rounded-l-lg rounded-r-none';
       case 'end':
-        return 'rounded-r-md rounded-l-none';
+        return 'rounded-r-lg rounded-l-none';
       case 'middle':
         return 'rounded-none';
       default:
-        return 'rounded-md';
+        return 'rounded-lg';
     }
   };
 
@@ -551,10 +551,11 @@ function DraggableJob({ job, getStatusColor, onJobOpen, dateKey, onDayClick, seg
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`
-        relative text-[11px] px-2 py-1.5 ${getBorderRadius(segmentType)}
+        relative text-[11px] px-2 py-1.5 rounded-lg shadow-sm border border-slate-200/80
+        ${getBorderRadius(segmentType)}
         ${getStatusColor(job.status)} ${getBorderClasses(segmentType)}
         ${isDragging ? 'cursor-grabbing ring-2 ring-blue-400 shadow-xl opacity-50' : 'cursor-grab'}
-        ${isHovered && !isDragging ? 'ring-1 ring-slate-300 shadow-sm' : ''}
+        ${isHovered && !isDragging ? 'ring-1 ring-slate-300 shadow-md' : ''}
         ${isHighlighted && !isDragging ? 'ring-2 ring-blue-500 ring-offset-1 shadow-lg z-10' : ''}
         transition-all
       `}
@@ -664,7 +665,7 @@ function DroppableDay({
     <div
       ref={setNodeRef}
       className={`
-        min-h-[350px] p-2.5 bg-white hover:bg-slate-50/30
+        min-h-[350px] p-3 bg-white hover:bg-slate-50/30
         ${isOver ? 'bg-blue-50 ring-1 ring-blue-300' : ''}
         transition-colors
       `}

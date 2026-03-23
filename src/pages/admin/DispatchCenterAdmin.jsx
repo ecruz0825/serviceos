@@ -132,6 +132,15 @@ export default function DispatchCenterAdmin() {
   // Get unassigned jobs (assigned_team_id IS NULL AND service_date = today)
   const unassignedJobs = todaysJobs.filter(job => !job.assigned_team_id);
 
+  // Group today's jobs for clear scan flow (exclude Canceled)
+  const needsAttentionJobs = todaysJobs.filter(job => !job.assigned_team_id && job.status !== 'Canceled');
+  const inProgressJobs = todaysJobs.filter(
+    job => job.assigned_team_id && (job.status === 'Pending' || job.status === 'In Progress')
+  );
+  const completedJobs = todaysJobs.filter(job => (job.status || '').toLowerCase() === 'completed');
+
+  const getTeamName = (teamId) => teams.find(t => t.id === teamId)?.name || '—';
+
   // Handle route regeneration for today's operational fixes
   const [regeneratingRoutes, setRegeneratingRoutes] = useState({});
 
@@ -291,6 +300,21 @@ export default function DispatchCenterAdmin() {
     }
   });
 
+  // Status badge styling (clean, minimal)
+  const getStatusBadge = (job) => {
+    if (!job.assigned_team_id) {
+      return <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800">Unassigned</span>;
+    }
+    const status = (job.status || 'Pending').toLowerCase();
+    if (status === 'completed') {
+      return <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800">Completed</span>;
+    }
+    if (status === 'in progress') {
+      return <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800">In Progress</span>;
+    }
+    return <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-700">Pending</span>;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -300,28 +324,27 @@ export default function DispatchCenterAdmin() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="Dispatch Center"
-        subtitle="Operational overview for today's services. Use Schedule for route planning and optimization."
+        subtitle="Today's services at a glance. Fix issues first, then run the board."
       />
 
-      {/* Dispatch Warnings */}
-      <Card>
+      {/* Focal: Needs Attention — stronger emphasis */}
+      <div className="rounded-2xl border-2 border-amber-200/90 bg-gradient-to-b from-amber-50/80 to-white p-1 shadow-sm">
+        <Card>
         <div className="p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
-            Dispatch Warnings
+          <h2 className="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            Needs Attention
           </h2>
           {dispatchWarnings.length === 0 ? (
-            <div className="text-sm text-green-700 bg-green-50 rounded-lg p-3">
-              No dispatch warnings for today.
-            </div>
+            <p className="text-sm text-slate-600">No dispatch warnings for today.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {dispatchWarnings.map((warning, index) => (
-                <div key={index} className="flex items-start justify-between gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                  <div className="flex items-start gap-2 flex-1">
+                <div key={index} className="flex items-start justify-between gap-3 py-3 px-4 bg-amber-50/80 rounded-lg border border-amber-200/80">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
                     <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                     <span className="text-sm text-slate-900">{warning.message}</span>
                   </div>
@@ -331,11 +354,11 @@ export default function DispatchCenterAdmin() {
                         onClick={() => handleRegenerateRoute(warning.teamId, warning.teamName)}
                         disabled={regeneratingRoutes[warning.teamId] || supportMode || billingDisabled}
                         variant="secondary"
-                        className="flex items-center gap-1 text-xs px-2 py-1"
+                        className="flex items-center gap-1 text-xs px-2 py-1.5 flex-shrink-0"
                         title={supportMode ? "Route regeneration is disabled in support mode" : billingDisabled ? billingReason : "Fix today's route order for this team"}
                       >
                         <RefreshCw className={`h-3 w-3 ${regeneratingRoutes[warning.teamId] ? 'animate-spin' : ''}`} />
-                        Fix Today's Route
+                        Fix Route
                       </Button>
                     </BillingGuard>
                   )}
@@ -345,11 +368,11 @@ export default function DispatchCenterAdmin() {
                         onClick={() => handleRegenerateRoute(warning.teamId, warning.teamName)}
                         disabled={regeneratingRoutes[warning.teamId] || supportMode || billingDisabled}
                         variant="secondary"
-                        className="flex items-center gap-1 text-xs px-2 py-1"
+                        className="flex items-center gap-1 text-xs px-2 py-1.5 flex-shrink-0"
                         title={supportMode ? "Route generation is disabled in support mode" : billingDisabled ? billingReason : "Generate today's route for this team"}
                       >
                         <Route className={`h-3 w-3 ${regeneratingRoutes[warning.teamId] ? 'animate-spin' : ''}`} />
-                        Generate Today's Route
+                        Generate Route
                       </Button>
                     </BillingGuard>
                   )}
@@ -358,150 +381,187 @@ export default function DispatchCenterAdmin() {
             </div>
           )}
         </div>
-      </Card>
+        </Card>
+      </div>
 
-      {/* Panel 1: Today's Jobs */}
+      {/* Today's Jobs — grouped */}
       <Card>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <Briefcase className="h-5 w-5" />
-            Today's Jobs
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-50 rounded-lg p-4">
-              <div className="text-sm text-slate-600 mb-1">Total</div>
-              <div className="text-2xl font-bold text-slate-900">{jobCounts.total}</div>
-            </div>
-            <div className="bg-green-50 rounded-lg p-4">
-              <div className="text-sm text-green-700 mb-1 flex items-center gap-1">
-                <CheckCircle className="h-4 w-4" />
-                Completed
-              </div>
-              <div className="text-2xl font-bold text-green-900">{jobCounts.completed}</div>
-            </div>
-            <div className="bg-amber-50 rounded-lg p-4">
-              <div className="text-sm text-amber-700 mb-1 flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                Pending
-              </div>
-              <div className="text-2xl font-bold text-amber-900">{jobCounts.pending}</div>
-            </div>
+        <div className="p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-slate-600" />
+              Today's Jobs
+            </h2>
+            <p className="text-xs text-slate-500 tabular-nums">
+              {jobCounts.total} total · {needsAttentionJobs.length} need attention · {inProgressJobs.length} in progress · {completedJobs.length} completed
+            </p>
           </div>
-        </div>
-      </Card>
 
-      {/* Panel 2: Crew Load */}
-      <Card>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Crew Load
-          </h2>
-          {crewLoad.length === 0 ? (
-            <div className="text-sm text-slate-500">No teams found</div>
+          {todaysJobs.length === 0 ? (
+            <p className="text-sm text-slate-500 py-4">No jobs scheduled today.</p>
           ) : (
-            <div className="space-y-3">
-              {crewLoad.map(crew => (
-                <div key={crew.teamId} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <span className="font-medium text-slate-900">{crew.teamName}</span>
-                  <span className="text-sm text-slate-600">
-                    {crew.jobsCount} {crew.jobsCount === 1 ? 'job' : 'jobs'}
-                  </span>
+            <div className="space-y-6">
+              {/* Needs Attention */}
+              {needsAttentionJobs.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Needs Attention</h3>
+                  <div className="rounded-lg border border-amber-200/80 bg-amber-50/50 overflow-hidden">
+                    <div className="divide-y divide-amber-200/60">
+                      {needsAttentionJobs.map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex flex-col sm:flex-row sm:items-center gap-3 py-4 px-4 sm:px-5"
+                        >
+                          <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 sm:items-center">
+                            <div className="min-w-0">
+                              <p className="font-medium text-slate-900 truncate">{job.customer?.full_name || 'Unknown Customer'}</p>
+                              <p className="text-xs text-slate-500 truncate mt-0.5">{job.customer?.address || 'No address'}</p>
+                            </div>
+                            <span className="text-xs text-slate-500 sm:text-right">Today</span>
+                            {getStatusBadge(job)}
+                          </div>
+                          <div className="flex-shrink-0">
+                            <Link to={`/admin/operations?tab=schedule&focusDate=${job.service_date}&jobId=${job.id}`}>
+                              <Button variant="tertiary" className="flex items-center gap-1.5 text-sm">
+                                <Calendar className="h-3.5 w-3.5" />
+                                Assign in Schedule
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {/* In Progress */}
+              {inProgressJobs.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">In Progress</h3>
+                  <div className="rounded-lg border border-slate-200 overflow-hidden">
+                    <div className="divide-y divide-slate-100">
+                      {inProgressJobs.map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex flex-col sm:flex-row sm:items-center gap-3 py-4 px-4 sm:px-5 hover:bg-slate-50/50 transition-colors"
+                        >
+                          <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 sm:items-center">
+                            <p className="font-medium text-slate-900 truncate">{job.customer?.full_name || 'Unknown Customer'}</p>
+                            <span className="text-xs text-slate-500 sm:text-right">Today · {getTeamName(job.assigned_team_id)}</span>
+                            {getStatusBadge(job)}
+                          </div>
+                          <div className="flex-shrink-0">
+                            <Link to={`/admin/jobs?openJobId=${job.id}`}>
+                              <Button variant="tertiary" className="text-sm">View</Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Completed */}
+              {completedJobs.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Completed</h3>
+                  <div className="rounded-lg border border-slate-200 overflow-hidden">
+                    <div className="divide-y divide-slate-100">
+                      {completedJobs.map((job) => (
+                        <div
+                          key={job.id}
+                          className="flex flex-col sm:flex-row sm:items-center gap-3 py-4 px-4 sm:px-5 hover:bg-slate-50/50 transition-colors"
+                        >
+                          <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 sm:items-center">
+                            <p className="font-medium text-slate-900 truncate">{job.customer?.full_name || 'Unknown Customer'}</p>
+                            <span className="text-xs text-slate-500 sm:text-right">Today · {getTeamName(job.assigned_team_id)}</span>
+                            {getStatusBadge(job)}
+                          </div>
+                          <div className="flex-shrink-0">
+                            <Link to={`/admin/jobs?openJobId=${job.id}`}>
+                              <Button variant="tertiary" className="text-sm">View</Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
       </Card>
 
-      {/* Panel 3: Unassigned Jobs */}
-      <Card>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <AlertCircle className="h-5 w-5" />
-            Unassigned Jobs
-          </h2>
-          {unassignedJobs.length === 0 ? (
-            <div className="text-sm text-slate-500">All jobs are assigned</div>
-          ) : (
-            <div className="space-y-3">
-              {unassignedJobs.map(job => (
-                <div key={job.id} className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                  <div className="font-medium text-slate-900 mb-1">
-                    {job.customer?.full_name || 'Unknown Customer'}
-                  </div>
-                  <div className="text-sm text-slate-600 mb-2">
-                    {job.customer?.address || 'No address'}
-                  </div>
-                  <Link to={`/admin/operations?tab=schedule&focusDate=${job.service_date}&jobId=${job.id}`}>
-                    <Button className="text-sm">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      Assign in Schedule
-                    </Button>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </Card>
+      {/* Crew Load — secondary */}
+      <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+          <Users className="h-4 w-4 text-slate-500" />
+          Crew Load
+        </h2>
+        {crewLoad.length === 0 ? (
+          <p className="text-sm text-slate-500">No teams found</p>
+        ) : (
+          <div className="space-y-2">
+            {crewLoad.map((crew) => (
+              <div key={crew.teamId} className="flex items-center justify-between py-3 px-4 rounded-lg bg-white/80 border border-slate-100">
+                <span className="font-medium text-slate-900">{crew.teamName}</span>
+                <span className="text-sm text-slate-600 tabular-nums">
+                  {crew.jobsCount} {crew.jobsCount === 1 ? 'job' : 'jobs'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Panel 4: Route Status */}
-      <Card>
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-            <Route className="h-5 w-5" />
-            Today's Route Status
+      {/* Route Status — secondary */}
+      <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-5 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+            <Route className="h-4 w-4 text-slate-500" />
+            Route Status
           </h2>
-          <p className="text-xs text-slate-500 mb-3">
-            Operational route status for today. Use Schedule for route planning and optimization.
-          </p>
           {routeStatus.length === 0 ? (
-            <div className="text-sm text-slate-500">No teams found</div>
+            <p className="text-sm text-slate-500">No teams found</p>
           ) : (
-            <div className="space-y-3">
-              {routeStatus.map(route => (
-                <div key={route.teamId} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                  <div className="flex items-center gap-2">
+            <div className="space-y-2">
+              {routeStatus.map((route) => (
+                <div key={route.teamId} className="flex items-center justify-between py-3 px-4 rounded-lg bg-white/80 border border-slate-100">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
                     <span className="font-medium text-slate-900">{route.teamName}</span>
                     {route.routeExists ? (
-                      <div className="flex items-center gap-1">
-                        <span 
-                          className={`text-xs px-2 py-1 rounded ${
-                            route.routeStatus === 'published' 
-                              ? 'bg-green-100 text-green-700' 
-                              : route.routeStatus === 'archived'
-                              ? 'bg-slate-200 text-slate-600'
-                              : 'bg-blue-100 text-blue-700'
-                          }`}
-                          title={
-                            route.routeStatus === 'published'
-                              ? 'Published route: Finalized and visible to crew'
-                              : route.routeStatus === 'archived'
-                              ? 'Archived route: Historical, no longer active'
-                              : route.routeStatus === 'draft'
-                              ? 'Draft route: Can be regenerated for today. Visible to crew if no published route exists.'
-                              : 'Route exists'
-                          }
-                        >
-                          {route.routeStatus || 'Route exists'}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded">
-                        No route
+                      <span
+                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${
+                          route.routeStatus === 'published'
+                            ? 'bg-green-100 text-green-800'
+                            : route.routeStatus === 'archived'
+                              ? 'bg-slate-100 text-slate-600'
+                              : 'bg-blue-100 text-blue-800'
+                        }`}
+                        title={
+                          route.routeStatus === 'published'
+                            ? 'Published'
+                            : route.routeStatus === 'archived'
+                              ? 'Archived'
+                              : 'Draft'
+                        }
+                      >
+                        {route.routeStatus || 'Draft'}
                       </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600">No route</span>
                     )}
                   </div>
-                  <span className="text-sm text-slate-600">
+                  <span className="text-sm text-slate-600 tabular-nums flex-shrink-0 ml-2">
                     {route.stopsCount} {route.stopsCount === 1 ? 'stop' : 'stops'}
                   </span>
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </Card>
+      </div>
     </div>
   );
 }

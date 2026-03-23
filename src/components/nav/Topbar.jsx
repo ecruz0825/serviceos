@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
+import useCompanySettings from "../../hooks/useCompanySettings";
 import { supabase } from "../../supabaseClient";
 import Button from "../ui/Button";
 import toast from "react-hot-toast";
@@ -38,8 +39,20 @@ function getRouteLabel(pathname) {
 export default function Topbar({ title, onMobileMenuClick }) {
   const location = useLocation();
   const { session, fullName } = useUser();
+  const { settings } = useCompanySettings();
 
-  const displayTitle = title || getRouteLabel(location.pathname);
+  const baseTitle = title || getRouteLabel(location.pathname);
+  const crewLabel = settings?.crew_label || "Crew";
+  const customerLabel = settings?.customer_label || "Customer";
+  const customerLabelPlural = customerLabel.endsWith("s") ? customerLabel : `${customerLabel}s`;
+
+  // Align topbar titles with tenant-configured labels where practical
+  const displayTitle =
+    baseTitle === "Customers"
+      ? customerLabelPlural
+      : baseTitle === "Workers"
+        ? crewLabel
+        : baseTitle;
   const userDisplay = fullName || session?.user?.email || "Account";
 
   const handleLogout = async () => {
@@ -55,21 +68,25 @@ export default function Topbar({ title, onMobileMenuClick }) {
   };
 
   return (
-    <header className="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-3">
-      <div className="flex items-center justify-between">
+    <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200 px-4 sm:px-6 h-14 sm:h-16 flex items-center shadow-sm shadow-slate-900/5">
+      <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={onMobileMenuClick}
-            className="md:hidden rounded-md p-2 text-slate-600 hover:bg-slate-100"
+            className="md:hidden rounded-md p-2 text-slate-600 hover:bg-slate-100 transition-colors"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-semibold text-slate-900 truncate">{displayTitle}</h1>
+          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 truncate">
+            {displayTitle}
+          </h1>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-slate-600">{userDisplay}</div>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="hidden sm:block text-sm text-slate-600 truncate max-w-[18rem]">
+            {userDisplay}
+          </div>
           {session && (
             <Button
               onClick={handleLogout}

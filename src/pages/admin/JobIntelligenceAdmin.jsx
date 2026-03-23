@@ -319,14 +319,16 @@ export default function JobIntelligenceAdmin() {
   const hasAnyInsights = kpiSummary.totalInsights > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title="Job Intelligence"
         subtitle="Operational insights and risk signals for jobs and schedules."
       />
 
-      {/* KPI Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Focal: Insights summary */}
+      <div className="rounded-2xl border-2 border-slate-200 bg-slate-50/50 p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4">Summary</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <div className="p-6">
             <div className="flex items-center gap-2 mb-2">
@@ -363,6 +365,7 @@ export default function JobIntelligenceAdmin() {
             <div className="text-2xl font-bold text-amber-900">{kpiSummary.routeMismatches}</div>
           </div>
         </Card>
+        </div>
       </div>
 
       {!hasAnyInsights ? (
@@ -375,11 +378,11 @@ export default function JobIntelligenceAdmin() {
           </div>
         </Card>
       ) : (
-        <>
+        <div className="space-y-6">
           {/* Insight 1: Unassigned Upcoming Jobs */}
           {unassignedUpcomingJobs.length > 0 && (
             <Card>
-              <div className="p-6">
+              <div className="p-5">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Users className="h-5 w-5 text-amber-600" />
                   Unassigned Upcoming Jobs
@@ -412,7 +415,7 @@ export default function JobIntelligenceAdmin() {
           {/* Insight 2: Jobs Assigned But Not Routed Today */}
           {assignedButNotRoutedToday.length > 0 && (
             <Card>
-              <div className="p-6">
+              <div className="p-5">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Route className="h-5 w-5 text-amber-600" />
                   Jobs Assigned But Not Routed Today
@@ -440,7 +443,7 @@ export default function JobIntelligenceAdmin() {
           {/* Insight 3: Route Mismatch */}
           {routeMismatches.length > 0 && (
             <Card>
-              <div className="p-6">
+              <div className="p-5">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
                   Route Mismatch
@@ -472,7 +475,7 @@ export default function JobIntelligenceAdmin() {
           {/* Insight 4: Missing Customer Address */}
           {missingAddressJobs.length > 0 && (
             <Card>
-              <div className="p-6">
+              <div className="p-5">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-amber-600" />
                   Missing Customer Address
@@ -507,7 +510,7 @@ export default function JobIntelligenceAdmin() {
           {/* Insight 5: Recurring Schedule Attention */}
           {recurringScheduleAttention.length > 0 && (
             <Card>
-              <div className="p-6">
+              <div className="p-5">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-amber-600" />
                   Recurring Schedule Attention
@@ -535,7 +538,7 @@ export default function JobIntelligenceAdmin() {
           {/* Insight 6: Incomplete Operational Data */}
           {incompleteDataJobs.length > 0 && (
             <Card>
-              <div className="p-6">
+              <div className="p-5">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <AlertCircle className="h-5 w-5 text-amber-600" />
                   Incomplete Operational Data
@@ -559,7 +562,7 @@ export default function JobIntelligenceAdmin() {
               </div>
             </Card>
           )}
-        </>
+        </div>
       )}
     </div>
   );
