@@ -259,56 +259,62 @@ export default function FinancialControlCenterAdmin() {
     paymentRiskItems.length > 0;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Financial Control Center"
-        subtitle="Identify payment issues and operational follow-up needs. Use Payments to record payments, Revenue Hub for reporting."
-      />
+    <div className="space-y-7">
+      <div className="rounded-xl border border-amber-200 bg-gradient-to-b from-amber-50/60 to-white p-5 md:p-6">
+        <PageHeader
+          title="Financial Control Center"
+          subtitle="Prioritize financial risk and payment attention items. Use Payments to record payments and Revenue Hub for broader reporting."
+        />
+      </div>
 
       {/* KPI Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <div className="p-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="border border-green-100 bg-green-50/40">
+          <div className="p-5">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="h-5 w-5 text-green-600" />
-              <div className="text-sm text-slate-600">Revenue This Month</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Revenue This Month</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">
+            <div className="text-3xl font-semibold leading-tight text-slate-900">
               ${kpiSummary.revenueThisMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
+            <div className="mt-1 text-xs text-slate-400">Cash received this month</div>
           </div>
         </Card>
-        <Card>
-          <div className="p-6">
+        <Card className="border border-amber-200 bg-amber-50/40">
+          <div className="p-5">
             <div className="flex items-center gap-2 mb-2">
               <AlertCircle className="h-5 w-5 text-amber-600" />
-              <div className="text-sm text-slate-600">Unpaid Jobs</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Unpaid Jobs</div>
             </div>
-            <div className="text-2xl font-bold text-amber-900">{kpiSummary.unpaidJobsCount}</div>
+            <div className="text-3xl font-semibold leading-tight text-amber-900">{kpiSummary.unpaidJobsCount}</div>
+            <div className="mt-1 text-xs text-slate-400">No payments recorded</div>
           </div>
         </Card>
-        <Card>
-          <div className="p-6">
+        <Card className="border border-amber-200 bg-amber-50/40">
+          <div className="p-5">
             <div className="flex items-center gap-2 mb-2">
               <CreditCard className="h-5 w-5 text-amber-600" />
-              <div className="text-sm text-slate-600">Partially Paid</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Partially Paid</div>
             </div>
-            <div className="text-2xl font-bold text-amber-900">{kpiSummary.partiallyPaidCount}</div>
+            <div className="text-3xl font-semibold leading-tight text-amber-900">{kpiSummary.partiallyPaidCount}</div>
+            <div className="mt-1 text-xs text-slate-400">Balances still outstanding</div>
           </div>
         </Card>
-        <Card>
-          <div className="p-6">
+        <Card className="border border-amber-200 bg-amber-50/40">
+          <div className="p-5">
             <div className="flex items-center gap-2 mb-2">
               <FileText className="h-5 w-5 text-amber-600" />
-              <div className="text-sm text-slate-600">Completed But Unpaid</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Completed But Unpaid</div>
             </div>
-            <div className="text-2xl font-bold text-amber-900">{kpiSummary.completedButUnpaidCount}</div>
+            <div className="text-3xl font-semibold leading-tight text-amber-900">{kpiSummary.completedButUnpaidCount}</div>
+            <div className="mt-1 text-xs text-slate-400">Completed work awaiting payment</div>
           </div>
         </Card>
       </div>
 
       {!hasAnyInsights ? (
-        <Card>
+        <Card className="border border-green-200 bg-green-50/40">
           <div className="p-6">
             <div className="text-sm text-green-700 bg-green-50 rounded-lg p-3 text-center">
               No payment issues detected. All jobs are paid or have no balance.
@@ -319,30 +325,36 @@ export default function FinancialControlCenterAdmin() {
         <>
           {/* Insight 1: Unpaid Jobs */}
           {unpaidJobs.length > 0 && (
-            <Card>
+            <Card className="border border-red-200 bg-red-50/30">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
                   <AlertCircle className="h-5 w-5 text-amber-600" />
                   Unpaid Jobs
                 </h2>
-                <div className="mb-2 text-sm text-slate-600">
+                <div className="mb-4 text-sm text-slate-600">
                   {unpaidJobs.length} {unpaidJobs.length === 1 ? 'job' : 'jobs'} with no payments recorded.
                 </div>
-                <div className="space-y-2">
+                <div className="rounded-lg border border-slate-200 bg-white divide-y">
                   {unpaidJobs.slice(0, 10).map(job => (
-                    <div key={job.id} className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                      <div className="font-medium text-slate-900 mb-1">
-                        {job.customer?.full_name || 'Unknown Customer'}
+                    <div key={job.id} className="border-l-4 border-red-500 bg-white px-4 py-3 hover:bg-slate-50">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="font-medium text-slate-900">
+                            {job.customer?.full_name || 'Unknown Customer'}
+                          </div>
+                          <div className="mt-1 text-sm text-slate-600">
+                            {job.service_date || 'No date'} • ${Number(job.job_cost || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                        <div>
+                          <Link to={`/admin/payments?jobId=${job.id}`}>
+                            <Button className="text-sm">
+                              <CreditCard className="h-4 w-4 mr-1" />
+                              Record Payment
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
-                      <div className="text-sm text-slate-600 mb-2">
-                        {job.service_date || 'No date'} • ${Number(job.job_cost || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </div>
-                      <Link to={`/admin/payments?jobId=${job.id}`}>
-                        <Button className="text-sm">
-                          <CreditCard className="h-4 w-4 mr-1" />
-                          Record Payment
-                        </Button>
-                      </Link>
                     </div>
                   ))}
                   {unpaidJobs.length > 10 && (
@@ -357,34 +369,40 @@ export default function FinancialControlCenterAdmin() {
 
           {/* Insight 2: Partially Paid Jobs */}
           {partiallyPaidJobs.length > 0 && (
-            <Card>
+            <Card className="border border-amber-200 bg-amber-50/30">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-amber-600" />
                   Partially Paid Jobs
                 </h2>
-                <div className="mb-2 text-sm text-slate-600">
+                <div className="mb-4 text-sm text-slate-600">
                   {partiallyPaidJobs.length} {partiallyPaidJobs.length === 1 ? 'job' : 'jobs'} with partial payments.
                 </div>
-                <div className="space-y-2">
+                <div className="rounded-lg border border-slate-200 bg-white divide-y">
                   {partiallyPaidJobs.slice(0, 10).map(job => {
                     const jobCost = Number(job.job_cost || 0);
                     const paidTotal = paymentsByJob[job.id] || 0;
                     const balance = jobCost - paidTotal;
                     return (
-                      <div key={job.id} className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="font-medium text-slate-900 mb-1">
-                          {job.customer?.full_name || 'Unknown Customer'}
+                      <div key={job.id} className="border-l-4 border-amber-500 bg-white px-4 py-3 hover:bg-slate-50">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="font-medium text-slate-900">
+                              {job.customer?.full_name || 'Unknown Customer'}
+                            </div>
+                            <div className="mt-1 text-sm text-slate-600">
+                              {job.service_date || 'No date'} • Paid: ${paidTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${jobCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} • Balance: ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                          </div>
+                          <div>
+                            <Link to={`/admin/payments?jobId=${job.id}`}>
+                              <Button className="text-sm">
+                                <CreditCard className="h-4 w-4 mr-1" />
+                                Record Payment
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
-                        <div className="text-sm text-slate-600 mb-2">
-                          {job.service_date || 'No date'} • Paid: ${paidTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${jobCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} • Balance: ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </div>
-                        <Link to={`/admin/payments?jobId=${job.id}`}>
-                          <Button className="text-sm">
-                            <CreditCard className="h-4 w-4 mr-1" />
-                            Record Payment
-                          </Button>
-                        </Link>
                       </div>
                     );
                   })}
@@ -400,34 +418,40 @@ export default function FinancialControlCenterAdmin() {
 
           {/* Insight 3: Completed But Unpaid */}
           {completedButUnpaid.length > 0 && (
-            <Card>
+            <Card className="border border-amber-200 bg-amber-50/30">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-amber-600" />
                   Completed But Unpaid
                 </h2>
-                <div className="mb-2 text-sm text-slate-600">
+                <div className="mb-4 text-sm text-slate-600">
                   {completedButUnpaid.length} completed {completedButUnpaid.length === 1 ? 'job' : 'jobs'} with remaining balance.
                 </div>
-                <div className="space-y-2">
+                <div className="rounded-lg border border-slate-200 bg-white divide-y">
                   {completedButUnpaid.slice(0, 10).map(job => {
                     const jobCost = Number(job.job_cost || 0);
                     const paidTotal = paymentsByJob[job.id] || 0;
                     const balance = jobCost - paidTotal;
                     return (
-                      <div key={job.id} className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <div className="font-medium text-slate-900 mb-1">
-                          {job.customer?.full_name || 'Unknown Customer'}
+                      <div key={job.id} className="border-l-4 border-amber-500 bg-white px-4 py-3 hover:bg-slate-50">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="font-medium text-slate-900">
+                              {job.customer?.full_name || 'Unknown Customer'}
+                            </div>
+                            <div className="mt-1 text-sm text-slate-600">
+                              {job.service_date || 'No date'} • Balance: ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                          </div>
+                          <div>
+                            <Link to={`/admin/payments?jobId=${job.id}`}>
+                              <Button className="text-sm">
+                                <CreditCard className="h-4 w-4 mr-1" />
+                                Record Payment
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
-                        <div className="text-sm text-slate-600 mb-2">
-                          {job.service_date || 'No date'} • Balance: ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </div>
-                        <Link to={`/admin/payments?jobId=${job.id}`}>
-                          <Button className="text-sm">
-                            <CreditCard className="h-4 w-4 mr-1" />
-                            Record Payment
-                          </Button>
-                        </Link>
                       </div>
                     );
                   })}
@@ -443,15 +467,18 @@ export default function FinancialControlCenterAdmin() {
 
           {/* Insight 4: Payment Risk / Attention */}
           {paymentRiskItems.length > 0 && (
-            <Card>
+            <Card className="border border-red-200 bg-red-50/30">
               <div className="p-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
                   Payment Risk / Attention
                 </h2>
-                <div className="space-y-4">
+                <div className="mb-4 text-sm text-slate-600">
+                  Escalation-oriented risk signals requiring review and follow-up.
+                </div>
+                <div className="space-y-3">
                   {paymentRiskItems.map((risk, index) => (
-                    <div key={index} className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                    <div key={index} className="rounded-lg border border-red-200 bg-white p-4">
                       <div className="font-medium text-slate-900 mb-2">{risk.message}</div>
                       {risk.jobs && risk.jobs.length > 0 && (
                         <div className="space-y-1 mt-2">
@@ -481,7 +508,7 @@ export default function FinancialControlCenterAdmin() {
                           )}
                         </div>
                       )}
-                      <div className="mt-3 flex gap-2">
+                      <div className="mt-3 flex flex-wrap gap-2">
                         {risk.type === 'completed_no_payment' && (
                           <Link to="/admin/revenue-hub">
                             <Button className="text-sm">

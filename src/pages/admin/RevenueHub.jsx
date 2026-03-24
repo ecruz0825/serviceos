@@ -2243,24 +2243,29 @@ export default function RevenueHub() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Revenue Hub"
-        subtitle="Financial reporting, analytics, and collections visibility. Use Payments to record payments, Financial Control Center for operational follow-up."
-        actions={
-          userRole && ['admin', 'manager', 'dispatcher'].includes(userRole) ? (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleSyncCases}
-              disabled={syncingCases || supportMode}
-              title={supportMode ? "Case sync is disabled in support mode" : undefined}
-            >
-              {syncingCases ? 'Syncing...' : 'Sync Cases'}
-            </Button>
-          ) : null
-        }
-      />
+    <div className="space-y-8">
+      <div className="rounded-xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/60 p-5 md:p-6">
+        <PageHeader
+          title="Revenue Hub"
+          subtitle="Financial reporting, analytics, and collections visibility. Use Payments to record payments, Financial Control Center for operational follow-up."
+          actions={
+            userRole && ['admin', 'manager', 'dispatcher'].includes(userRole) ? (
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1">
+                <span className="hidden text-xs font-medium text-slate-500 sm:inline">Operations</span>
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  onClick={handleSyncCases}
+                  disabled={syncingCases || supportMode}
+                  title={supportMode ? "Case sync is disabled in support mode" : undefined}
+                >
+                  {syncingCases ? 'Syncing...' : 'Sync Cases'}
+                </Button>
+              </div>
+            ) : null
+          }
+        />
+      </div>
 
       {Object.keys(financeLoadErrors).length > 0 && (
         <Card className="border border-amber-300 bg-amber-50">
@@ -2280,53 +2285,122 @@ export default function RevenueHub() {
         </Card>
       )}
 
+      {/* Executive Summary */}
+      {(financialSnapshot || profitSnapshot || profitSnapshotLoading) && (
+        <Card className="border border-slate-200 shadow-sm bg-gradient-to-b from-white to-slate-50/40">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Executive Summary</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Top-line financial health and cash performance.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Outstanding AR</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-slate-900">
+                {formatCurrency(financialSnapshot?.outstanding_ar || 0)}
+              </div>
+              <div className="mt-1 text-xs text-slate-400">Open receivables</div>
+            </div>
+            <div className="rounded-xl border border-red-100 bg-red-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Overdue AR</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-red-600">
+                {formatCurrency(financialSnapshot?.overdue_ar || 0)}
+              </div>
+              <div className="mt-1 text-xs text-slate-400">Past due amount</div>
+            </div>
+            <div className="rounded-xl border border-green-100 bg-green-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Cash Revenue</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-green-600">
+                {profitSnapshotLoading ? 'Loading...' : formatCurrency(profitSnapshot?.revenue || 0)}
+              </div>
+              <div className="mt-1 text-xs text-slate-400">Current month</div>
+            </div>
+            <div className="rounded-xl border border-green-100 bg-green-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Net Profit</div>
+              <div className={`mt-2 text-3xl font-semibold leading-tight ${(profitSnapshot?.net_profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {profitSnapshotLoading ? 'Loading...' : formatCurrency(profitSnapshot?.net_profit || 0)}
+              </div>
+              <div className="mt-1 text-xs text-slate-400">Revenue minus expenses</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Profit Margin</div>
+              <div className={`mt-2 text-3xl font-semibold leading-tight ${(profitSnapshot?.profit_margin || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {profitSnapshotLoading ? 'Loading...' : formatPercent(profitSnapshot?.profit_margin)}
+              </div>
+              <div className="mt-1 text-xs text-slate-400">Margin efficiency</div>
+            </div>
+            <div className="rounded-xl border border-green-100 bg-green-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Collected Last 30 Days</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-green-600">
+                {formatCurrency(financialSnapshot?.collected_window || 0)}
+              </div>
+              <div className="mt-1 text-xs text-slate-400">Recent collections</div>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Financial Snapshot */}
       {financialSnapshot && (
-        <Card>
-          <h2 className="text-lg font-semibold mb-4">Financial Snapshot</h2>
-          <p className="text-sm text-slate-600 mb-4">
+        <Card className="border border-slate-200/70 shadow-sm">
+          <div className="mb-5">
+            <h2 className="text-base font-semibold text-slate-900">Financial Snapshot</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Core receivables and collection efficiency metrics.
+            </p>
+          </div>
+          <p className="text-sm text-slate-600 mb-5">
             AR metrics are invoice-based; collected metric is cash received from posted payments.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Outstanding AR</div>
-              <div className="text-2xl font-bold text-slate-900">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Outstanding AR</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-slate-900">
                 {formatCurrency(financialSnapshot.outstanding_ar || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Overdue AR</div>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="mt-1 text-xs text-slate-400">Open receivables balance</div>
+            </div>
+            <div className="rounded-xl border border-red-100 bg-red-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Overdue AR</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-red-600">
                 {formatCurrency(financialSnapshot.overdue_ar || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Expected Next 14 Days</div>
-              <div className="text-2xl font-bold text-amber-600">
+              <div className="mt-1 text-xs text-slate-400">Past due invoices</div>
+            </div>
+            <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Expected Next 14 Days</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-amber-600">
                 {formatCurrency(financialSnapshot.expected_next_days || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Collected Last 30 Days</div>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="mt-1 text-xs text-slate-400">Near-term expected cash-in</div>
+            </div>
+            <div className="rounded-xl border border-green-100 bg-green-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Collected Last 30 Days</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-green-600">
                 {formatCurrency(financialSnapshot.collected_window || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Avg Days To Pay</div>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="mt-1 text-xs text-slate-400">Recent cash collections</div>
+            </div>
+            <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Avg Days To Pay</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-blue-600">
                 {Math.round(financialSnapshot.avg_days_to_pay || 0)} days
               </div>
-            </Card>
+              <div className="mt-1 text-xs text-slate-400">Collection velocity</div>
+            </div>
           </div>
         </Card>
       )}
 
       {/* Profit Snapshot (Cash Basis) */}
       {(profitSnapshot || profitSnapshotLoading) && (
-        <Card>
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-lg font-semibold">Profit Snapshot (Cash Basis)</h2>
+        <Card className="border border-slate-200/70 shadow-sm">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Profit Snapshot (Cash Basis)</h2>
+              <p className="mt-1 text-xs text-slate-500">Current month performance at a glance.</p>
+            </div>
             <Button
               variant="secondary"
               size="sm"
@@ -2336,107 +2410,122 @@ export default function RevenueHub() {
               Export CSV
             </Button>
           </div>
-          <p className="text-sm text-slate-600 mb-4">
+          <p className="text-sm text-slate-600 mb-5">
             Collected payments minus recorded expenses for the current month.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Cash Revenue</div>
-              <div className="text-2xl font-bold text-green-600">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-xl border border-green-100 bg-green-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Cash Revenue</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-green-600">
                 {profitSnapshotLoading ? 'Loading...' : formatCurrency(profitSnapshot?.revenue || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Cash Expenses</div>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="mt-1 text-xs text-slate-400">Posted inflows this month</div>
+            </div>
+            <div className="rounded-xl border border-red-100 bg-red-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Cash Expenses</div>
+              <div className="mt-2 text-3xl font-semibold leading-tight text-red-600">
                 {profitSnapshotLoading ? 'Loading...' : formatCurrency(profitSnapshot?.expenses || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Net Profit</div>
-              <div className={`text-2xl font-bold ${(profitSnapshot?.net_profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <div className="mt-1 text-xs text-slate-400">Recorded spend this month</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Net Profit</div>
+              <div className={`mt-2 text-3xl font-semibold leading-tight ${(profitSnapshot?.net_profit || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {profitSnapshotLoading ? 'Loading...' : formatCurrency(profitSnapshot?.net_profit || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Profit Margin</div>
-              <div className={`text-2xl font-bold ${(profitSnapshot?.profit_margin || 0) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+              <div className="mt-1 text-xs text-slate-400">Revenue minus expenses</div>
+            </div>
+            <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 md:p-5">
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Profit Margin</div>
+              <div className={`mt-2 text-3xl font-semibold leading-tight ${(profitSnapshot?.profit_margin || 0) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
                 {profitSnapshotLoading ? 'Loading...' : formatPercent(profitSnapshot?.profit_margin)}
               </div>
-            </Card>
+              <div className="mt-1 text-xs text-slate-400">Net profit as percent of revenue</div>
+            </div>
           </div>
         </Card>
       )}
 
       {/* Cash Forecast */}
       {(cashForecast || cashForecastLoading) && (
-        <Card>
-          <h2 className="text-lg font-semibold mb-4">Cash Forecast</h2>
+        <Card className="border border-slate-200/70 shadow-sm">
+          <div className="mb-5">
+            <h2 className="text-base font-semibold text-slate-900">Cash Forecast</h2>
+            <p className="mt-1 text-xs text-slate-500">Near-term collection outlook and aging exposure.</p>
+          </div>
           {cashForecastLoading ? (
             <div className="text-center py-8 text-slate-500">Loading cash forecast...</div>
           ) : !cashForecast ? (
             <div className="text-center py-8 text-slate-500">Cash forecast is currently unavailable.</div>
           ) : (
             <>
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Expected Collections</div>
-              <div className="text-2xl font-bold text-slate-900">
+          <div className="mb-4 rounded-xl border border-slate-200 bg-slate-50/70 p-3 md:p-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Expected Collections</div>
+                <div className="mt-2 text-3xl font-semibold leading-tight text-slate-900">
                 {formatCurrency(cashForecast.expected_collections || 0)}
+                </div>
+                <div className="mt-1 text-xs text-slate-400">Most likely scenario</div>
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Optimistic</div>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="rounded-lg border border-green-100 bg-green-50/50 p-4">
+                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Optimistic</div>
+                <div className="mt-2 text-3xl font-semibold leading-tight text-green-600">
                 {formatCurrency(cashForecast.optimistic_collections || 0)}
+                </div>
+                <div className="mt-1 text-xs text-slate-400">Upper bound estimate</div>
               </div>
-            </Card>
-            <Card>
-              <div className="text-sm text-slate-600 mb-1">Pessimistic</div>
-              <div className="text-2xl font-bold text-amber-600">
+              <div className="rounded-lg border border-amber-100 bg-amber-50/50 p-4">
+                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Pessimistic</div>
+                <div className="mt-2 text-3xl font-semibold leading-tight text-amber-600">
                 {formatCurrency(cashForecast.pessimistic_collections || 0)}
+                </div>
+                <div className="mt-1 text-xs text-slate-400">Conservative scenario</div>
               </div>
-            </Card>
+            </div>
           </div>
-          <div className="mb-4 grid grid-cols-2 md:grid-cols-6 gap-3">
-            <Card>
-              <div className="text-xs text-slate-600 mb-1">0-7 Days</div>
-              <div className="text-lg font-semibold text-slate-900">
+          <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3 md:p-4">
+            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Aging Buckets</div>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+              <div className="text-[11px] text-slate-500 mb-1">0-7 Days</div>
+              <div className="text-lg font-semibold leading-tight text-slate-900">
                 {formatCurrency(cashForecast.bucket_0_7 || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-xs text-slate-600 mb-1">8-14 Days</div>
-              <div className="text-lg font-semibold text-amber-600">
+            </div>
+            <div className="rounded-lg border border-amber-100 bg-amber-50/50 p-3">
+              <div className="text-[11px] text-slate-500 mb-1">8-14 Days</div>
+              <div className="text-lg font-semibold leading-tight text-amber-600">
                 {formatCurrency(cashForecast.bucket_8_14 || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-xs text-slate-600 mb-1">15-30 Days</div>
-              <div className="text-lg font-semibold text-orange-600">
+            </div>
+            <div className="rounded-lg border border-orange-100 bg-orange-50/50 p-3">
+              <div className="text-[11px] text-slate-500 mb-1">15-30 Days</div>
+              <div className="text-lg font-semibold leading-tight text-orange-600">
                 {formatCurrency(cashForecast.bucket_15_30 || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-xs text-slate-600 mb-1">31-60 Days</div>
-              <div className="text-lg font-semibold text-red-600">
+            </div>
+            <div className="rounded-lg border border-red-100 bg-red-50/50 p-3">
+              <div className="text-[11px] text-slate-500 mb-1">31-60 Days</div>
+              <div className="text-lg font-semibold leading-tight text-red-600">
                 {formatCurrency(cashForecast.bucket_31_60 || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-xs text-slate-600 mb-1">61-90 Days</div>
-              <div className="text-lg font-semibold text-red-700">
+            </div>
+            <div className="rounded-lg border border-red-200 bg-red-50/50 p-3">
+              <div className="text-[11px] text-slate-500 mb-1">61-90 Days</div>
+              <div className="text-lg font-semibold leading-tight text-red-700">
                 {formatCurrency(cashForecast.bucket_61_90 || 0)}
               </div>
-            </Card>
-            <Card>
-              <div className="text-xs text-slate-600 mb-1">90+ Days</div>
-              <div className="text-lg font-semibold text-red-900">
+            </div>
+            <div className="rounded-lg border border-red-300 bg-red-50/60 p-3">
+              <div className="text-[11px] text-slate-500 mb-1">90+ Days</div>
+              <div className="text-lg font-semibold leading-tight text-red-900">
                 {formatCurrency(cashForecast.bucket_90_plus || 0)}
               </div>
-            </Card>
+            </div>
+            </div>
           </div>
-          <div className="flex gap-4 text-sm text-slate-600">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
             <span>
               {cashForecast.open_invoice_count || 0} open invoice{cashForecast.open_invoice_count !== 1 ? 's' : ''}
             </span>
@@ -2449,25 +2538,36 @@ export default function RevenueHub() {
         </Card>
       )}
 
+      <section className="space-y-5 pt-2">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold text-slate-900">Reporting &amp; Trends</h2>
+          <p className="text-sm text-slate-500">
+            Performance reporting across charts, trend tables, and revenue breakdowns.
+          </p>
+        </div>
+
       {/* Financial Charts */}
       {userRole && ['admin', 'manager', 'dispatcher'].includes(userRole) && (
-        <Card>
-          <h2 className="text-lg font-semibold">Financial Charts</h2>
-          <p className="text-sm text-slate-600 mb-4">
+        <Card className="border border-slate-200/80 shadow-sm">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-slate-900">Financial Charts</h2>
+            <p className="mt-1 text-xs text-slate-500">Trend view for revenue, expenses, and profitability.</p>
+          </div>
+          <p className="text-sm text-slate-600 mb-5">
             Monthly cash collected, recorded expenses, and net profit.
           </p>
 
           {(trendsLoading || profitTrendsLoading) ? (
-            <div className="h-[320px] flex items-center justify-center text-slate-500">
+            <div className="h-[340px] rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-center text-slate-500">
               Loading financial charts...
             </div>
           ) : financialChartData.length === 0 ? (
-            <div className="h-[320px] flex flex-col items-center justify-center text-slate-500">
+            <div className="h-[340px] rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center text-slate-500">
               <p className="text-sm font-medium mb-1">No financial trend data yet</p>
               <p className="text-xs text-slate-400">Financial charts will appear once you have payment and expense history.</p>
             </div>
           ) : (
-            <div className="h-[320px]">
+            <div className="h-[340px] rounded-xl border border-slate-200 bg-white p-2 md:p-3">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={financialChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -2707,6 +2807,16 @@ export default function RevenueHub() {
           </div>
         </Card>
       )}
+
+      </section>
+
+      <section className="space-y-5 pt-2">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold text-slate-900">Receivables &amp; Collections</h2>
+          <p className="text-sm text-slate-500">
+            Manage aging balances, collection workflows, and communication activity.
+          </p>
+        </div>
 
       {/* AR Aging */}
       {arAging && (
@@ -4268,6 +4378,16 @@ export default function RevenueHub() {
         </div>
       )}
 
+      </section>
+
+      <section className="space-y-5 pt-2">
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold text-slate-900">Operational Follow-up</h2>
+          <p className="text-sm text-slate-500">
+            Keep pipeline tasks moving with queue-driven follow-up and remediation.
+          </p>
+        </div>
+
       {/* KPI Strip */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -4357,6 +4477,7 @@ export default function RevenueHub() {
           </div>
         )}
       </Card>
+      </section>
 
       {/* Queue 2: Needs Scheduling */}
       <Card>
